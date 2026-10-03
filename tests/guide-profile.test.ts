@@ -103,8 +103,10 @@ describe("guide.getStructureProfile", () => {
       "UNII",
     ]);
     expect(data.synonyms[0]?.name).toBe("N-acetylcysteine");
-    // Products flow through the obprod junction; strengths stay on the link.
-    expect(data.products.map((p) => p.id)).toEqual([683206, 683207]);
+    // obprod links carry the obprod-space prod_ids and strengths (the
+    // product table join is impossible — disjoint id spaces).
+    expect(data.obprodLinks.map((l) => l.prod_id)).toEqual([683206, 683207]);
+    expect(data.obprodLinks[0]?.strength).toBe("EQ 200MG BASE/VIAL");
     expect(data.atc.map((a) => a.atc_code)).toEqual(["R05CB01"]);
     expect(data.drugClasses).toEqual([]);
     expect(provenance.structId).toBe(102);
@@ -122,7 +124,7 @@ describe("guide.getStructureProfile", () => {
     expect(data.structure).toBeNull();
     expect(data.identifiers).toEqual([]);
     expect(data.synonyms).toEqual([]);
-    expect(data.products).toEqual([]);
+    expect(data.obprodLinks).toEqual([]);
     expect(data.atc).toEqual([]);
     expect(data.drugClasses).toEqual([]);
     expect(provenance.structId).toBe(999999999);
@@ -136,6 +138,6 @@ describe("guide.getStructureProfile", () => {
     const { data } = await client.guide.getStructureProfile(102);
     expect(data.structure?.id).toBe(102);
     expect(data.identifiers).toEqual([]);
-    expect(data.products).toEqual([]);
+    expect(data.obprodLinks).toEqual([]);
   });
 });

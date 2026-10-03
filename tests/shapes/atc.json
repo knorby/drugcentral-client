@@ -1,0 +1,16 @@
+[
+  {
+    "chemical_substance": "string",
+    "chemical_substance_count": "number",
+    "code": "string",
+    "id": "number",
+    "l1_code": "string",
+    "l1_name": "string",
+    "l2_code": "string",
+    "l2_name": "string",
+    "l3_code": "string",
+    "l3_name": "string",
+    "l4_code": "string",
+    "l4_name": "string"
+  }
+]

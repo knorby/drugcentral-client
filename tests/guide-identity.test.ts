@@ -2,8 +2,6 @@ import { describe, expect, test } from "vitest";
 import { createDrugCentralClient, DrugCentralError } from "../src/index";
 import type { DrugStructure } from "../src/types/structures";
 import type { Synonym } from "../src/types/synonyms";
-import type { Product } from "../src/types/products";
-import type { Struct2Obprod } from "../src/types/classification";
 import type { IdentifierRecord } from "../src/types/identifiers";
 import { routingFetch } from "./helpers";
 
@@ -173,47 +171,16 @@ describe("guide.resolveIdentifier", () => {
 });
 
 describe("guide.resolveByNdc", () => {
-  const PRODUCT: Product = {
-    id: 2928251,
-    product_name: "GLYBURIDE AND METFORMIN HYDROCHLORIDE",
-    generic_name: "GLYBURIDE AND METFORMIN HYDROCHLORIDE",
-    ndc_product_code: "55111-695",
-    route: "ORAL",
-    form: "TABLET",
-    active_ingredient_count: 2,
-    marketing_status: "ANDA",
-  };
-  const LINKS: Struct2Obprod[] = [
-    { struct_id: 102, prod_id: 2928251, strength: "EQ 200MG BASE/VIAL" },
-    { struct_id: 103, prod_id: 2928251, strength: null },
-  ];
-
-  test("resolves product → ingredient structures", async () => {
-    const { client } = clientWithRoutes({
-      "product/ndc_product_code/55111-695": [PRODUCT],
-      "struct2obprod/prod_id/2928251": LINKS,
+  test("throws as an explicitly unsupported capability (disjoint id spaces)", async () => {
+    const client = createDrugCentralClient({
+      baseUrl: "https://x.test",
+      fetch: routingFetch({}).fetch,
     });
-    const { data } = await client.guide.resolveByNdc("55111-695");
-    expect(data.map((m) => m.structId)).toEqual([102, 103]);
-    expect(data[0]).toMatchObject({
-      idType: "NDC",
-      identifier: "55111-695",
-      matchKind: "ndc-product",
-    });
-  });
-
-  test("unknown NDC yields [] rather than an error", async () => {
-    const { client } = clientWithRoutes({});
-    const { data } = await client.guide.resolveByNdc("00000-000");
-    expect(data).toEqual([]);
-  });
-
-  test("product with no ingredient links yields []", async () => {
-    const { client } = clientWithRoutes({
-      "product/ndc_product_code/55111-695": [PRODUCT],
-      // struct2obprod missing → 404 → treated as no links
-    });
-    const { data } = await client.guide.resolveByNdc("55111-695");
-    expect(data).toEqual([]);
+    await expect(client.guide.resolveByNdc("55111-695")).rejects.toThrow(
+      /not supported by this DrugCentral API version/,
+    );
+    await expect(client.guide.resolveByNdc("55111-695")).rejects.toBeInstanceOf(
+      DrugCentralError,
+    );
   });
 });

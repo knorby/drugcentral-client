@@ -1,0 +1,7 @@
+[
+  {
+    "prod_id": "number",
+    "strength": "string",
+    "struct_id": "number"
+  }
+]

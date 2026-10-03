@@ -16,7 +16,6 @@ import {
   createSynonymsResource,
 } from "./resources/identity";
 import {
-  createProductsResource,
   createStruct2AtcResource,
   createStruct2ObprodResource,
 } from "./resources/classification";
@@ -25,7 +24,6 @@ import type { GuidedResult, Provenance } from "./types/provenance";
 import type { DrugStructure } from "./types/structures";
 import type { Synonym } from "./types/synonyms";
 import type { IdentifierRecord } from "./types/identifiers";
-import type { Product } from "./types/products";
 import type {
   DrugClass,
   Struct2Atc,
@@ -87,10 +85,12 @@ export interface StructureProfile {
   /** Name variants (including the preferred name when present). */
   synonyms: Synonym[];
   /**
-   * Marketed products containing this ingredient (via struct2obprod).
-   * Ingredient facts do not automatically describe every product.
+   * Orange Book product links for this ingredient (via struct2obprod),
+   * including strength where supplied. These `prod_id`s live in the obprod
+   * id space — they do not join to the `product` table's ids (verified live
+   * 2026-10-03), so full Product records cannot be attached here.
    */
-  products: Product[];
+  obprodLinks: Struct2Obprod[];
   /** ATC code assignments (via struct2atc). */
   atc: Struct2Atc[];
   /**
@@ -142,7 +142,6 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
   const synonyms = createSynonymsResource(requester);
   const identifiers = createIdentifiersResource(requester);
   const idTypes = createIdTypesResource(requester);
-  const products = createProductsResource(requester);
   const struct2obprod = createStruct2ObprodResource(requester);
   const struct2atc = createStruct2AtcResource(requester);
   const omopRelationships = createOmopRelationshipsResource(requester);
@@ -256,37 +255,24 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
     },
 
     /**
-     * Resolves an NDC product code through the product table: product →
-     * ingredient structures (with strength recorded on the product link, not
-     * invented here). A code with no product, or a product with no ingredient
-     * links, resolves to `[]`. Ingredient-level facts still do not describe
-     * every marketed product.
+     * **Not supported by this API version — always throws.** Resolving an
+     * NDC to ingredient structures requires joining the `product` table to
+     * `struct2obprod`, but their product ids are disjoint id spaces
+     * (verified live 2026-10-03: product id 2928251 has no obprod rows;
+     * obprod prod_id 639159 has no product row) and no obprod-by-NDC
+     * endpoint is exposed. Kept as an explicit, documented unsupported
+     * capability rather than silently returning empty matches. Use
+     * `resolveByRxcui`/`resolveByUnii` or `searchStructuresByName` instead.
      */
     async resolveByNdc(
-      ndcProductCode: string,
+      _ndcProductCode: string,
     ): Promise<GuidedResult<IdentifierMatch[]>> {
-      const productRows = await tolerateNotFound(
-        products.byNdcProductCode(ndcProductCode),
+      throw new DrugCentralError(
+        "NDC → structure resolution is not supported by this DrugCentral API version: " +
+          "the product table and struct2obprod reference disjoint product id spaces, " +
+          "and no obprod-by-NDC endpoint exists (verified 2026-10-03). " +
+          "Use resolveByRxcui, resolveByUnii, or searchStructuresByName.",
       );
-      const links: Struct2Obprod[] = [];
-      for (const product of productRows as Product[]) {
-        const rows = await tolerateNotFound(
-          struct2obprod.byProdId(product.id),
-        );
-        links.push(...(rows as Struct2Obprod[]));
-      }
-      return {
-        data: links.map((link) => ({
-          structId: link.struct_id,
-          identifier: ndcProductCode,
-          idType: "NDC",
-          parentMatch: null,
-          matchKind: "ndc-product" as const,
-        })),
-        provenance: provenance(
-          `product/ndc_product_code/{code}; struct2obprod/prod_id/{id}`,
-        ),
-      };
     },
 
     /**
@@ -308,17 +294,12 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
           tolerateNotFound(struct2obprod.byStructId(structId)),
           tolerateNotFound(struct2atc.byStructId(structId)),
         ]);
-      const productRows = await Promise.all(
-        (links as Struct2Obprod[]).map((link) =>
-          tolerateNotFound(products.byId(link.prod_id)),
-        ),
-      );
       return {
         data: {
           structure: (structureRows as DrugStructure[])[0] ?? null,
           identifiers: identifierRows as IdentifierRecord[],
           synonyms: synonymRows as Synonym[],
-          products: (productRows as Product[][]).flat(),
+          obprodLinks: links as Struct2Obprod[],
           atc: atcRows as Struct2Atc[],
           drugClasses: [],
         },

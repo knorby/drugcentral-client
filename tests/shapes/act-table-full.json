@@ -1,0 +1,28 @@
+[
+  {
+    "accession": "string",
+    "act_comment": "string",
+    "act_id": "number",
+    "act_ref_id": "null",
+    "act_source": "string",
+    "act_source_url": "null",
+    "act_type": "null",
+    "act_unit": "null",
+    "act_value": "null",
+    "action_type": "string",
+    "first_in_class": "null",
+    "gene": "string",
+    "moa": "number",
+    "moa_ref_id": "null",
+    "moa_source": "string",
+    "moa_source_url": "string",
+    "organism": "string",
+    "relation": "null",
+    "struct_id": "number",
+    "swissprot": "string",
+    "target_class": "string",
+    "target_id": "number",
+    "target_name": "string",
+    "tdl": "null"
+  }
+]

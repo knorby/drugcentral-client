@@ -22,15 +22,20 @@ const BASE =
   "https://uxn2ycvimg.us-east-2.awsapprunner.com";
 const FORCE = process.argv.includes("--force");
 
+/** Run only when executed directly (capture-shapes.mjs imports SAMPLES). */
+const IS_DIRECT_RUN =
+  process.argv[1] !== undefined &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
 /** Max rows stored in one fixture file (larger responses are truncated). */
 const MAX_ROWS = 50;
 
 /** Curated samples: one per resource group plus evidence cases. */
-const SAMPLES = [
+export const SAMPLES = [
   { file: "structures", path: "/structures/id/5391" },
   { file: "structures-list", path: "/structures", params: { limit: 5 } },
   { file: "synonyms", path: "/synonyms/name/ibuprofen", params: { limit: 20 } },
-  { file: "id-type", path: "/id_type" },
+  { file: "id-type", path: "/id_type", params: { limit: 50 } },
   { file: "identifier", path: "/identifier/id/1762385" },
   {
     file: "identifier-rxnorm",
@@ -176,4 +181,4 @@ async function main() {
   }
 }
 
-main();
+if (IS_DIRECT_RUN) main();

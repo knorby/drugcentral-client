@@ -1,0 +1,12 @@
+[
+  {
+    "active_ingredient_count": "number",
+    "form": "string",
+    "generic_name": "string",
+    "id": "number",
+    "marketing_status": "string",
+    "ndc_product_code": "string",
+    "product_name": "string",
+    "route": "string"
+  }
+]
