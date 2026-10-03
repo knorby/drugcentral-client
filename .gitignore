@@ -27,3 +27,7 @@ coverage/
 *.log
 *.bak
 .env*
+
+# --- Superpowers plans/specs (local scratch, not committed) ---
+.superpowers/
+docs/superpowers/

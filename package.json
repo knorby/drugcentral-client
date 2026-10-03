@@ -1,8 +1,31 @@
 {
-  "name": "repo-template-typescript",
+  "name": "@knorby/drugcentral-client",
   "version": "0.0.0",
-  "description": "A TypeScript starter template for universal npm packages (Node, React Native, and more).",
+  "description": "A fully-typed, zero-dependency TypeScript client for the DrugCentral API. Universal: Node, React Native, browsers, Bun, and Deno.",
   "license": "Apache-2.0",
+  "keywords": [
+    "drugcentral",
+    "drug",
+    "pharmacology",
+    "indication",
+    "off-label",
+    "faers",
+    "adverse-events",
+    "atc",
+    "api",
+    "client",
+    "typescript",
+    "react-native",
+    "universal"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knorby/drugcentral-client.git"
+  },
+  "homepage": "https://github.com/knorby/drugcentral-client",
+  "bugs": {
+    "url": "https://github.com/knorby/drugcentral-client/issues"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

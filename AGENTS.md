@@ -2,9 +2,27 @@
 
 Instructions and steering for AI coding agents working in this repository.
 
-This is a TypeScript starter template for universal npm packages (Node, React
-Native, and more). Customize per project and keep this file updated as
-conventions evolve.
+`@knorby/drugcentral-client` is a fully-typed, zero-dependency TypeScript
+client for the [DrugCentral](https://drugcentral.org) API. Universal target:
+Node, React Native, browsers, Bun, Deno — no Node-only APIs in `src/`.
+
+Project notes:
+
+- Deterministic tests never hit the network. Live smoke tests run only with
+  `DRUGCENTRAL_LIVE_TESTS=1` (`npm run test:live`). Shape-drift tooling:
+  `npm run drift:check` / `npm run drift:capture`.
+- The upstream API host (`https://uxn2ycvimg.us-east-2.awsapprunner.com`,
+  observed 2026-10-03) is an App Runner deployment and may change. It is
+  caller-configurable via `baseUrl`; the default lives in `src/constants.ts`.
+- The upstream OpenAPI declares no response schemas. `src/types/` is derived
+  from sampled live payloads checked in under `tests/fixtures/`, snapshotted
+  from `tests/fixtures/openapi.json` (hash in `tests/fixtures/openapi.meta.json`).
+- DrugCentral data is CC BY-SA 4.0; this code is Apache-2.0. The README
+  carries required attribution, license separation, and the no-medical-advice
+  disclaimer — keep them intact on any rewrite.
+- Known upstream quirks the client handles explicitly: some filtered
+  endpoints ignore `limit`; transient non-JSON 5xx bodies occur; there is no
+  version endpoint (source version is "not supplied", never invented).
 
 ---
 
@@ -80,6 +98,9 @@ scanning). Both are needed for full coverage.
 | `npm test` | Run tests once (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage reporting |
+| `npm run test:live` | Opt-in live smoke tests against the real DrugCentral API (`DRUGCENTRAL_LIVE_TESTS=1`) |
+| `npm run drift:capture` | Capture upstream response shapes into `tests/shapes/` |
+| `npm run drift:check` | Fail if captured upstream shapes differ from the snapshots |
 | `npx changeset` | Create a changeset (required for any change that affects published output) |
 
 ---
@@ -124,27 +145,22 @@ PRs and release them all at once.
 - **To release**: `npx changeset version` (bumps `package.json` +
   `CHANGELOG.md`), then `npm run release` (builds + publishes).
 - **GitHub Actions release** (`workflow-templates/release.yml`): ships
-  **staged** — GitHub only runs workflows from `.github/workflows/`, so this
-  workflow is inert in the template repo (no publish attempts on pushes to
-  `main`). To activate in a repo created from this template:
-  `git mv workflow-templates/release.yml .github/workflows/release.yml`.
-  Once active, it runs on every push to `main` (and can be triggered
-  manually via `workflow_dispatch`, e.g. to retry after a transient publish
-  failure): with no pending changesets
-  it is a no-op. With changesets, it opens a "Version Packages" PR
-  (`changeset version` bumps the version string, updates `CHANGELOG.md`,
-  and removes consumed changesets); merging that PR publishes to npm, tags,
-  and creates a GitHub Release. Publishing uses OIDC trusted publishing — no
-  npm token secrets are involved. Permissions follow the changesets v2
-  sub-action split (`select-mode` → `version` | `pack` → `publish`);
-  `id-token: write` is scoped to the publish job only.
+  **staged** — this repo starts **private**, and provenance requires a public
+  repository, so the workflow stays out of `.github/workflows/` until the
+  repo goes public. At go-public time: `git mv
+  workflow-templates/release.yml .github/workflows/release.yml` and follow
+  the one-time setup below. Once active, it runs on every push to `main`
+  (and can be triggered manually via `workflow_dispatch`): with no pending
+  changesets it is a no-op; with changesets, it opens a "Version Packages" PR;
+  merging that PR publishes to npm, tags, and creates a GitHub Release.
+  Publishing uses OIDC trusted publishing — no npm token secrets are involved.
 - **Always verify before publishing**: `npm run build && npm pack --dry-run`
   to confirm only `dist/`, `README.md`, `CHANGELOG.md`, and `LICENSE` are
   included.
 
 ### One-time release setup (repository owner)
 
-0. Activate the staged workflow:
+0. Activate the staged workflow when going public:
    `git mv workflow-templates/release.yml .github/workflows/release.yml`.
 1. Repo **Settings → Actions → General → Workflow permissions**: select **Read
    and write permissions**, and check **Allow GitHub Actions to create and
@@ -191,9 +207,9 @@ gh release create vX.Y.Z --notes-from-tag
   npm provenance attestation (cryptographic link to commit + workflow).
   Provenance requires publishing from CI on a **public** repository; the
   manual first publish temporarily removes it (see "First publish").
-- **Scoped names** — use `@knorby/package`-style scoped names to prevent
-  dependency confusion attacks. Scoped packages default to restricted
-  visibility, so `publishConfig.access: "public"` is set.
+- **Scoped names** — `@knorby/…` scoped names prevent dependency confusion
+  attacks. Scoped packages default to restricted visibility, so
+  `publishConfig.access: "public"` is set.
 - **No secrets in published files** — the `files` field in `package.json`
   whitelists only `dist`, `README.md`, `CHANGELOG.md`, and `LICENSE`. Never
   add `src/`, `.env`, `tsconfig.json`, or other config to the `files` list.
@@ -227,10 +243,19 @@ These rules are mandatory. Follow them strictly.
 
 - Keep `AGENTS.md` and `README.md` up to date as part of any change that
   affects setup, conventions, or project structure.
-- Use the `docs/` directory for higher-level design notes, architecture, and
-  decision records (ADRs). See `docs/README.md` for the ADR template.
-- Treat `docs/` as living documentation. Create an ADR in `docs/decisions/`
-  for significant design decisions.
+- `docs/superpowers/` (plans, specs) and `.superpowers/` are **local
+  scratch, gitignored by design** — never commit them.
+- There is no tracked `docs/` tree; put usage knowledge in `README.md` and
+  conventions here.
+
+### Data and medical disclaimers
+
+- DrugCentral is the data source (CC BY-SA 4.0); this package is code only
+  (Apache-2.0). Do not remove or weaken the README's attribution, license
+  separation, or no-medical-advice disclaimer.
+- The client never invents upstream facts: absent fields stay absent,
+  `relationship_name` labels stay verbatim, FAERS numbers are signals (not
+  incidence), and no version metadata is fabricated.
 
 ### Before declaring done
 
