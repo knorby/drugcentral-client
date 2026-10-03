@@ -8,6 +8,7 @@ import {
 } from "./resources/identity";
 import {
   createProductsResource,
+  createStruct2AtcResource,
   createStruct2ObprodResource,
 } from "./resources/classification";
 import { DrugCentralNotFoundError } from "./errors";
@@ -16,7 +17,11 @@ import type { DrugStructure } from "./types/structures";
 import type { Synonym } from "./types/synonyms";
 import type { IdentifierRecord } from "./types/identifiers";
 import type { Product } from "./types/products";
-import type { Struct2Obprod } from "./types/classification";
+import type {
+  DrugClass,
+  Struct2Atc,
+  Struct2Obprod,
+} from "./types/classification";
 
 /**
  * Identifier vocabularies verified live on 2026-10-03 (`/id_type` plus the
@@ -64,6 +69,29 @@ export interface IdentifierMatch {
   matchKind: "identifier" | "ndc-product";
 }
 
+/** One assembled view of a structure across DrugCentral's tables. */
+export interface StructureProfile {
+  /** The structure record, or `null` when the id matches nothing. */
+  structure: DrugStructure | null;
+  /** External-vocabulary identifiers recorded for the structure. */
+  identifiers: IdentifierRecord[];
+  /** Name variants (including the preferred name when present). */
+  synonyms: Synonym[];
+  /**
+   * Marketed products containing this ingredient (via struct2obprod).
+   * Ingredient facts do not automatically describe every product.
+   */
+  products: Product[];
+  /** ATC code assignments (via struct2atc). */
+  atc: Struct2Atc[];
+  /**
+   * Pharmacologic classes. Always `[]` today: this API version exposes no
+   * path from a structure to `drug_class` rows (the table filters by
+   * id/name/source only). Reserved so consumers can rely on the shape.
+   */
+  drugClasses: DrugClass[];
+}
+
 /** Builds the provenance envelope shared by every guided result. */
 function provenance(
   endpoint: string,
@@ -102,6 +130,7 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
   const idTypes = createIdTypesResource(requester);
   const products = createProductsResource(requester);
   const struct2obprod = createStruct2ObprodResource(requester);
+  const struct2atc = createStruct2AtcResource(requester);
   void idTypes; // exposed for future guided helpers; namespaces stay public
 
   return {
@@ -239,6 +268,46 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
         })),
         provenance: provenance(
           `product/ndc_product_code/{code}; struct2obprod/prod_id/{id}`,
+        ),
+      };
+    },
+
+    /**
+     * Assembles a structure's identity view across tables: the structure
+     * record, external identifiers, synonyms, marketed products (through the
+     * obprod junction), and ATC assignments — in parallel. A missing
+     * structure is a normal outcome: `structure: null` with empty sections,
+     * not an error. Absent fields stay absent ("not supplied"), never
+     * zeroed or invented.
+     */
+    async getStructureProfile(
+      structId: number,
+    ): Promise<GuidedResult<StructureProfile>> {
+      const [structureRows, identifierRows, synonymRows, links, atcRows] =
+        await Promise.all([
+          tolerateNotFound(structures.byId(structId)),
+          tolerateNotFound(identifiers.byStructId(structId)),
+          tolerateNotFound(synonyms.byId(structId)),
+          tolerateNotFound(struct2obprod.byStructId(structId)),
+          tolerateNotFound(struct2atc.byStructId(structId)),
+        ]);
+      const productRows = await Promise.all(
+        (links as Struct2Obprod[]).map((link) =>
+          tolerateNotFound(products.byId(link.prod_id)),
+        ),
+      );
+      return {
+        data: {
+          structure: (structureRows as DrugStructure[])[0] ?? null,
+          identifiers: identifierRows as IdentifierRecord[],
+          synonyms: synonymRows as Synonym[],
+          products: (productRows as Product[][]).flat(),
+          atc: atcRows as Struct2Atc[],
+          drugClasses: [],
+        },
+        provenance: provenance(
+          "structures/id/{id}; identifier|synonyms|struct2obprod|struct2atc by struct",
+          structId,
         ),
       };
     },
