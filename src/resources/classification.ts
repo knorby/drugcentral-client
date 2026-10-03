@@ -1,5 +1,5 @@
 import type { DrugCentralRequester, QueryParamValue } from "../http";
-import { paginateAll, type PaginateOptions } from "../pagination";
+import { type PaginateOptions, paginateAll } from "../pagination";
 import type {
   AtcCode,
   DrugClass,
@@ -7,7 +7,7 @@ import type {
   Struct2Obprod,
 } from "../types/classification";
 import type { Product } from "../types/products";
-import type { ListParams, ExportFormat } from "./identity";
+import type { ExportFormat, ListParams } from "./identity";
 import { seg } from "./identity";
 
 /**

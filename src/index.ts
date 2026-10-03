@@ -24,13 +24,21 @@ export {
   DrugCentralNotFoundError,
   DrugCentralTimeoutError,
 } from "./errors";
-export type { DrugCentralGuide } from "./guide";
+export {
+  type DrugCentralGuide,
+  type IdentifierMatch,
+  KNOWN_IDENTIFIER_TYPES,
+  type PopulationStampedSignal,
+  type StructureCandidate,
+  type StructureProfile,
+} from "./guide";
 export {
   type DrugCentralClientConfig,
+  DrugCentralRequester,
   type FetchLike,
   type QueryParamValue,
-  DrugCentralRequester,
 } from "./http";
-export { paginateAll, type PaginateOptions } from "./pagination";
-export { buildQueryString } from "./utils/serialize";
+export { type PaginateOptions, paginateAll } from "./pagination";
 export type * from "./types";
+export { KNOWN_RELATIONSHIP_NAMES } from "./types/omop";
+export { buildQueryString } from "./utils/serialize";

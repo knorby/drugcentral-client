@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { paginateAll } from "../src/pagination";
 import { DEFAULT_PAGE_SIZE } from "../src/constants";
+import { paginateAll } from "../src/pagination";
 
 describe("paginateAll", () => {
   test("walks pages until a short page arrives", async () => {
@@ -39,8 +39,7 @@ describe("paginateAll", () => {
   });
 
   test("stops after maxPages even when pages stay full", async () => {
-    const fetchPage = () =>
-      Promise.resolve([1, 2, 3] as number[]); // always a "full" page
+    const fetchPage = () => Promise.resolve([1, 2, 3] as number[]); // always a "full" page
     const out: number[] = [];
     for await (const row of paginateAll(fetchPage, {
       pageSize: 3,
@@ -76,7 +75,9 @@ describe("paginateAll", () => {
 
   test("rejects invalid pageSize eagerly, not on first next()", () => {
     expect(() =>
-      paginateAll(() => Promise.resolve([]), { pageSize: 0 })[Symbol.asyncIterator](),
+      paginateAll(() => Promise.resolve([]), { pageSize: 0 })[
+        Symbol.asyncIterator
+      ](),
     ).toThrow(RangeError);
   });
 });

@@ -22,4 +22,10 @@ export interface Provenance {
 export interface GuidedResult<T> {
   data: T;
   provenance: Provenance;
+  /**
+   * `true` when local client-side truncation was applied (e.g. a requested
+   * `limit` on a search). Truncation is labeled, never presented as complete
+   * upstream coverage.
+   */
+  truncated?: boolean;
 }

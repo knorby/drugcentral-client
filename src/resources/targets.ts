@@ -1,5 +1,5 @@
 import type { DrugCentralRequester, QueryParamValue } from "../http";
-import { paginateAll, type PaginateOptions } from "../pagination";
+import { type PaginateOptions, paginateAll } from "../pagination";
 import type {
   ActTableFullEntry,
   TargetClass,
@@ -11,7 +11,7 @@ import type {
   Tdgo2Tc,
   Tdkey2Tc,
 } from "../types/targets";
-import type { ListParams, ExportFormat } from "./identity";
+import type { ExportFormat, ListParams } from "./identity";
 import { seg } from "./identity";
 
 /**
@@ -168,7 +168,8 @@ export function createTargetsResource(requester: DrugCentralRequester) {
         opts?: PaginateOptions,
       ): AsyncGenerator<TargetGo> {
         return paginateAll(
-          (skip, limit) => requester.get("target_go", { ...params, skip, limit }),
+          (skip, limit) =>
+            requester.get("target_go", { ...params, skip, limit }),
           opts,
         );
       },
@@ -294,7 +295,8 @@ export function createTargetsResource(requester: DrugCentralRequester) {
         opts?: PaginateOptions,
       ): AsyncGenerator<Tdkey2Tc> {
         return paginateAll(
-          (skip, limit) => requester.get("tdkey2tc", { ...params, skip, limit }),
+          (skip, limit) =>
+            requester.get("tdkey2tc", { ...params, skip, limit }),
           opts,
         );
       },

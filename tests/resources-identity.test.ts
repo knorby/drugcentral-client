@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 import type { DrugCentralRequester } from "../src/http";
 import {
-  createIdTypesResource,
   createIdentifiersResource,
+  createIdTypesResource,
   createStructuresResource,
   createSynonymsResource,
 } from "../src/resources/identity";
@@ -18,7 +18,11 @@ function mockRequester() {
     calls.push({ path });
     return "csv-body";
   });
-  const requester = { get, getText, baseUrl: "https://x.test" } as unknown as DrugCentralRequester;
+  const requester = {
+    get,
+    getText,
+    baseUrl: "https://x.test",
+  } as unknown as DrugCentralRequester;
   return { requester, calls };
 }
 
@@ -119,9 +123,7 @@ describe("identifiers resource", () => {
 
   test("has no exportText (no csv/tsv upstream)", () => {
     const { requester } = mockRequester();
-    expect(
-      "exportText" in createIdentifiersResource(requester),
-    ).toBe(false);
+    expect("exportText" in createIdentifiersResource(requester)).toBe(false);
   });
 });
 

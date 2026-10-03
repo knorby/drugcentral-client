@@ -42,9 +42,7 @@ function mergeShapes(a: unknown, b: unknown): unknown {
     !Array.isArray(b)
   ) {
     const out = { ...(a as Record<string, unknown>) };
-    for (const [key, bShape] of Object.entries(
-      b as Record<string, unknown>,
-    )) {
+    for (const [key, bShape] of Object.entries(b as Record<string, unknown>)) {
       out[key] = key in a ? mergeShapes(out[key], bShape) : bShape;
     }
     return out;
@@ -57,7 +55,6 @@ function mergeShapes(a: unknown, b: unknown): unknown {
   );
   return objectSide ?? "mixed";
 }
-
 
 /**
  * True when every field the fixture shape carries is covered by the

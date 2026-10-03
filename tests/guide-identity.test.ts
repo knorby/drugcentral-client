@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { createDrugCentralClient, DrugCentralError } from "../src/index";
+import type { IdentifierRecord } from "../src/types/identifiers";
 import type { DrugStructure } from "../src/types/structures";
 import type { Synonym } from "../src/types/synonyms";
-import type { IdentifierRecord } from "../src/types/identifiers";
 import { routingFetch } from "./helpers";
 
 const STRUCT_IBUPROFEN: DrugStructure = {
@@ -52,9 +52,8 @@ describe("guide.searchStructuresByName", () => {
       "structures/name/ibuprofen": [STRUCT_IBUPROFEN],
       "synonyms/name/ibuprofen": SYN_IBUPROFEN_ROWS,
     });
-    const { data, provenance } = await client.guide.searchStructuresByName(
-      "ibuprofen",
-    );
+    const { data, provenance } =
+      await client.guide.searchStructuresByName("ibuprofen");
     const structIds = data.map((c) => c.structId);
     // Both 1407 (ibuprofen) and 3851 (dexibuprofen) are distinct matches.
     expect(structIds).toContain(1407);
@@ -95,9 +94,8 @@ describe("guide.searchStructuresByName", () => {
         },
       ],
     });
-    const { data } = await client.guide.searchStructuresByName(
-      "ibuprofen lysine",
-    );
+    const { data } =
+      await client.guide.searchStructuresByName("ibuprofen lysine");
     expect(data).toHaveLength(1);
     expect(data[0]).toMatchObject({
       structId: 1407,
@@ -161,9 +159,9 @@ describe("guide.resolveIdentifier", () => {
     });
     await client.guide.resolveByRxcui(259453);
     await client.guide.resolveByUnii("M9BYU8XDQ6");
-    expect(mock.urls.some((u) => u.endsWith("/identifier/identifier/259453"))).toBe(
-      true,
-    );
+    expect(
+      mock.urls.some((u) => u.endsWith("/identifier/identifier/259453")),
+    ).toBe(true);
     expect(
       mock.urls.some((u) => u.endsWith("/identifier/identifier/M9BYU8XDQ6")),
     ).toBe(true);

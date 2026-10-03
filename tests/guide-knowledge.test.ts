@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { createDrugCentralClient } from "../src/index";
-import type { OmopRelationship } from "../src/types/omop";
 import type { FaersSignal } from "../src/types/faers";
+import type { OmopRelationship } from "../src/types/omop";
 import type { ActTableFullEntry } from "../src/types/targets";
 import { routingFetch } from "./helpers";
 
@@ -99,9 +99,8 @@ describe("guide.getConditionRelationships", () => {
     const client = makeClient({
       "omop_relationship/struct_id/5391": RELATIONSHIPS,
     });
-    const { data, provenance } = await client.guide.getConditionRelationships(
-      5391,
-    );
+    const { data, provenance } =
+      await client.guide.getConditionRelationships(5391);
     expect(data).toHaveLength(3);
     expect(new Set(data.map((r) => r.relationship_name))).toEqual(
       new Set(["indication", "off-label use", "contraindication"]),

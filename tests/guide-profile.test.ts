@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { createDrugCentralClient } from "../src/index";
-import type { DrugStructure } from "../src/types/structures";
-import type { IdentifierRecord } from "../src/types/identifiers";
-import type { Synonym } from "../src/types/synonyms";
-import type { Product } from "../src/types/products";
 import type { Struct2Atc, Struct2Obprod } from "../src/types/classification";
+import type { IdentifierRecord } from "../src/types/identifiers";
+import type { Product } from "../src/types/products";
+import type { DrugStructure } from "../src/types/structures";
+import type { Synonym } from "../src/types/synonyms";
 import { routingFetch } from "./helpers";
 
 const STRUCT: DrugStructure = {
@@ -118,9 +118,8 @@ describe("guide.getStructureProfile", () => {
       baseUrl: "https://x.test",
       fetch: routingFetch({}).fetch,
     });
-    const { data, provenance } = await client.guide.getStructureProfile(
-      999999999,
-    );
+    const { data, provenance } =
+      await client.guide.getStructureProfile(999999999);
     expect(data.structure).toBeNull();
     expect(data.identifiers).toEqual([]);
     expect(data.synonyms).toEqual([]);

@@ -53,7 +53,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly && node -e \"require('fs').copyFileSync('dist/index.d.ts','dist/index.d.cts')\"",
+    "build": "tsup && tsc --emitDeclarationOnly && node scripts/fix-declaration-imports.mjs && node -e \"require('fs').copyFileSync('dist/index.d.ts','dist/index.d.cts')\"",
     "dev": "tsup --watch",
     "lint": "biome check",
     "format": "biome format --write",

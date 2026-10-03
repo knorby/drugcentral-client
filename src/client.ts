@@ -1,11 +1,5 @@
-import { DrugCentralRequester, type DrugCentralClientConfig } from "./http";
 import { createDrugCentralGuide, type DrugCentralGuide } from "./guide";
-import {
-  createIdTypesResource,
-  createIdentifiersResource,
-  createStructuresResource,
-  createSynonymsResource,
-} from "./resources/identity";
+import { type DrugCentralClientConfig, DrugCentralRequester } from "./http";
 import {
   createAtcResource,
   createDrugClassesResource,
@@ -13,6 +7,12 @@ import {
   createStruct2AtcResource,
   createStruct2ObprodResource,
 } from "./resources/classification";
+import {
+  createIdentifiersResource,
+  createIdTypesResource,
+  createStructuresResource,
+  createSynonymsResource,
+} from "./resources/identity";
 import {
   createFaersResource,
   createOmopRelationshipsResource,
@@ -54,7 +54,9 @@ export interface DrugCentralClient {
   /** The identifier vocabularies themselves. */
   readonly idTypes: ReturnType<typeof createIdTypesResource>;
   /** Drug–condition relationships (indications, off-label, …). */
-  readonly omopRelationships: ReturnType<typeof createOmopRelationshipsResource>;
+  readonly omopRelationships: ReturnType<
+    typeof createOmopRelationshipsResource
+  >;
   /** FAERS adverse-event signals (population-stratified). */
   readonly faers: ReturnType<typeof createFaersResource>;
   /** Marketed products (NDC/route/form). */

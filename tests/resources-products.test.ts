@@ -18,7 +18,11 @@ function mockRequester() {
     calls.push({ path });
     return "body";
   });
-  const requester = { get, getText, baseUrl: "https://x.test" } as unknown as DrugCentralRequester;
+  const requester = {
+    get,
+    getText,
+    baseUrl: "https://x.test",
+  } as unknown as DrugCentralRequester;
   return { requester, calls };
 }
 

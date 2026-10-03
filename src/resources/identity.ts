@@ -1,8 +1,8 @@
 import type { DrugCentralRequester, QueryParamValue } from "../http";
-import { paginateAll, type PaginateOptions } from "../pagination";
+import { type PaginateOptions, paginateAll } from "../pagination";
+import type { IdentifierRecord, IdType } from "../types/identifiers";
 import type { DrugStructure } from "../types/structures";
 import type { Synonym } from "../types/synonyms";
-import type { IdType, IdentifierRecord } from "../types/identifiers";
 
 /** Skip/limit parameters accepted by every list endpoint. */
 export interface ListParams {
@@ -158,10 +158,7 @@ export function createIdTypesResource(requester: DrugCentralRequester) {
       return requester.get(path);
     },
     getAll(opts?: PaginateOptions): AsyncGenerator<IdType> {
-      return paginateAll(
-        (_skip, _limit) => requester.get(path),
-        opts,
-      );
+      return paginateAll((_skip, _limit) => requester.get(path), opts);
     },
   };
 }

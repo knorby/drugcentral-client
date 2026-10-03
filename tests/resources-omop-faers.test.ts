@@ -1,6 +1,9 @@
 import { describe, expect, test, vi } from "vitest";
 import type { DrugCentralRequester } from "../src/http";
-import { createFaersResource, createOmopRelationshipsResource } from "../src/resources/knowledge";
+import {
+  createFaersResource,
+  createOmopRelationshipsResource,
+} from "../src/resources/knowledge";
 
 function mockRequester() {
   const calls: Array<{ path: string; params?: Record<string, unknown> }> = [];
@@ -12,7 +15,11 @@ function mockRequester() {
     calls.push({ path });
     return "body";
   });
-  const requester = { get, getText, baseUrl: "https://x.test" } as unknown as DrugCentralRequester;
+  const requester = {
+    get,
+    getText,
+    baseUrl: "https://x.test",
+  } as unknown as DrugCentralRequester;
   return { requester, calls };
 }
 
@@ -74,7 +81,10 @@ describe("faers resource", () => {
     await r.byStructId(2391, { population: "male" });
     await r.byStructId(2391, { population: "female" });
     await r.list({ population: "female", limit: 5 });
-    for await (const _row of r.getAll({ population: "male" }, { maxPages: 1 })) {
+    for await (const _row of r.getAll(
+      { population: "male" },
+      { maxPages: 1 },
+    )) {
       break;
     }
     expect(calls.map((c) => c.path)).toEqual([

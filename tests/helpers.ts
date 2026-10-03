@@ -132,4 +132,3 @@ export function routingFetch(routes: Record<string, unknown>) {
   };
   return { fetch: fn as unknown as typeof fetch, urls };
 }
-

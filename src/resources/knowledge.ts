@@ -1,8 +1,8 @@
 import type { DrugCentralRequester, QueryParamValue } from "../http";
-import { paginateAll, type PaginateOptions } from "../pagination";
-import type { OmopRelationship } from "../types/omop";
+import { type PaginateOptions, paginateAll } from "../pagination";
 import type { FaersPopulation, FaersSignal } from "../types/faers";
-import type { ListParams, ExportFormat } from "./identity";
+import type { OmopRelationship } from "../types/omop";
+import type { ExportFormat, ListParams } from "./identity";
 import { seg } from "./identity";
 
 /**
@@ -16,7 +16,9 @@ import { seg } from "./identity";
  * and compare `relationship_name` with `===` client-side — which is what the
  * guided layer does.
  */
-export function createOmopRelationshipsResource(requester: DrugCentralRequester) {
+export function createOmopRelationshipsResource(
+  requester: DrugCentralRequester,
+) {
   const path = "omop_relationship";
   return {
     /** One relationship row by its own id. */
@@ -117,7 +119,10 @@ export function createFaersResource(requester: DrugCentralRequester) {
       );
     },
     /** Signals for one MedDRA code. */
-    byMeddraCode(code: number | string, opts?: FaersOptions): Promise<FaersSignal[]> {
+    byMeddraCode(
+      code: number | string,
+      opts?: FaersOptions,
+    ): Promise<FaersSignal[]> {
       return requester.get(
         `${populationPath(opts?.population)}/meddra_code/${seg(code)}`,
       );

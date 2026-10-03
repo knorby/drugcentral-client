@@ -1,34 +1,33 @@
-import { DrugCentralError } from "./errors";
+import { DrugCentralError, DrugCentralNotFoundError } from "./errors";
+import type { DrugCentralRequester } from "./http";
+import {
+  createStruct2AtcResource,
+  createStruct2ObprodResource,
+} from "./resources/classification";
+import {
+  createIdentifiersResource,
+  createIdTypesResource,
+  createStructuresResource,
+  createSynonymsResource,
+} from "./resources/identity";
+import type { FaersOptions } from "./resources/knowledge";
 import {
   createFaersResource,
   createOmopRelationshipsResource,
 } from "./resources/knowledge";
 import { createTargetActivityResource } from "./resources/targets";
-import type { OmopRelationship } from "./types/omop";
-import type { FaersPopulation, FaersSignal } from "./types/faers";
-import type { ActTableFullEntry } from "./types/targets";
-import type { FaersOptions } from "./resources/knowledge";
-import type { DrugCentralRequester } from "./http";
-import {
-  createIdTypesResource,
-  createIdentifiersResource,
-  createStructuresResource,
-  createSynonymsResource,
-} from "./resources/identity";
-import {
-  createStruct2AtcResource,
-  createStruct2ObprodResource,
-} from "./resources/classification";
-import { DrugCentralNotFoundError } from "./errors";
-import type { GuidedResult, Provenance } from "./types/provenance";
-import type { DrugStructure } from "./types/structures";
-import type { Synonym } from "./types/synonyms";
-import type { IdentifierRecord } from "./types/identifiers";
 import type {
   DrugClass,
   Struct2Atc,
   Struct2Obprod,
 } from "./types/classification";
+import type { FaersPopulation, FaersSignal } from "./types/faers";
+import type { IdentifierRecord } from "./types/identifiers";
+import type { OmopRelationship } from "./types/omop";
+import type { GuidedResult, Provenance } from "./types/provenance";
+import type { DrugStructure } from "./types/structures";
+import type { Synonym } from "./types/synonyms";
+import type { ActTableFullEntry } from "./types/targets";
 
 /**
  * Identifier vocabularies verified live on 2026-10-03 (`/id_type` plus the
@@ -107,10 +106,7 @@ export type PopulationStampedSignal = FaersSignal & {
 };
 
 /** Builds the provenance envelope shared by every guided result. */
-function provenance(
-  endpoint: string,
-  structId?: number,
-): Provenance {
+function provenance(endpoint: string, structId?: number): Provenance {
   return {
     source: "drugcentral",
     endpoint,
@@ -156,12 +152,16 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
      * return many structures, and one structure many names; nothing is
      * auto-collapsed or auto-chosen. Duplicates by structure id keep the
      * preferred-name match reason.
+     *
+     * `opts.limit` caps the result **client-side** (the upstream name-filter
+     * endpoints ignore `limit`); when capping drops candidates, the result
+     * carries `truncated: true` — truncation is labeled, never implied
+     * complete.
      */
     async searchStructuresByName(
       name: string,
       opts?: { limit?: number },
     ): Promise<GuidedResult<StructureCandidate[]>> {
-      const params = opts ? { limit: opts.limit } : undefined;
       const [structRows, synonymRows] = await Promise.all([
         tolerateNotFound(structures.byName(name)),
         tolerateNotFound(synonyms.byName(name)),
@@ -194,10 +194,15 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
         });
       }
       return {
-        data: [...candidates.values()],
-        provenance: provenance(
-          `structures/name/{name}; synonyms/name/{name}`,
-        ),
+        data:
+          opts?.limit === undefined || candidates.size <= opts.limit
+            ? [...candidates.values()]
+            : [...candidates.values()].slice(0, opts.limit),
+        truncated:
+          opts?.limit === undefined || candidates.size <= opts.limit
+            ? undefined
+            : true,
+        provenance: provenance(`structures/name/{name}; synonyms/name/{name}`),
       };
     },
 
@@ -222,9 +227,7 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
         );
       }
       const identifier = String(value);
-      const rows = await tolerateNotFound(
-        identifiers.byIdentifier(identifier),
-      );
+      const rows = await tolerateNotFound(identifiers.byIdentifier(identifier));
       const matches = (rows as IdentifierRecord[])
         .filter((row) => row.id_type === type)
         .map((row) => ({
@@ -248,9 +251,7 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
     },
 
     /** Resolves a UNII to structure matches. */
-    resolveByUnii(
-      unii: string,
-    ): Promise<GuidedResult<IdentifierMatch[]>> {
+    resolveByUnii(unii: string): Promise<GuidedResult<IdentifierMatch[]>> {
       return this.resolveIdentifier({ type: "UNII", value: unii });
     },
 
@@ -398,9 +399,7 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
     async getTargetActivity(
       structId: number,
     ): Promise<GuidedResult<ActTableFullEntry[]>> {
-      const rows = await tolerateNotFound(
-        targetActivity.byStructId(structId),
-      );
+      const rows = await tolerateNotFound(targetActivity.byStructId(structId));
       return {
         data: rows as ActTableFullEntry[],
         provenance: provenance("act_table_full/struct_id/{id}", structId),

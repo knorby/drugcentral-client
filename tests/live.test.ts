@@ -44,7 +44,6 @@ describeLive("live smoke: identity", () => {
     expect(data.length).toBeGreaterThanOrEqual(1);
     expect(data.some((m) => m.structId === 4)).toBe(true);
   });
-
 });
 
 describeLive("live smoke: knowledge", () => {
