@@ -63,7 +63,10 @@ describe("headers", () => {
   test("sends Accept JSON and a package User-Agent by default", async () => {
     const { requester, mock } = makeRequester([{ id: 1 }]);
     await requester.get("atc");
-    const headers = mock.inits[0].headers as Record<string, string>;
+    const headers = (mock.inits[0] as RequestInit).headers as Record<
+      string,
+      string
+    >;
     expect(headers.accept).toBe("application/json");
     expect(headers["user-agent"]).toMatch(/^@knorby\/drugcentral-client\//);
   });
@@ -77,7 +80,10 @@ describe("headers", () => {
       userAgent: "my-agent/1",
     });
     await requester.get("atc");
-    const headers = mock.inits[0].headers as Record<string, string>;
+    const headers = (mock.inits[0] as RequestInit).headers as Record<
+      string,
+      string
+    >;
     expect(headers["x-custom"]).toBe("yes");
     expect(headers["user-agent"]).toBe("my-agent/1");
   });
@@ -102,7 +108,9 @@ describe("responses", () => {
     const { requester } = makeRequester([
       { status: 200, body: "Internal something went wrong" },
     ]);
-    const error = await requester.get("structures").catch((e) => e);
+    const error = (await requester
+      .get("structures")
+      .catch((e: unknown) => e)) as DrugCentralInvalidResponseError;
     expect(error).toBeInstanceOf(DrugCentralInvalidResponseError);
     expect(error.bodyExcerpt).toContain("Internal something went wrong");
     expect(error.url).toContain("/structures");
@@ -112,7 +120,9 @@ describe("responses", () => {
     const { requester } = makeRequester([
       { status: 500, body: "Internal Server Error" },
     ]);
-    const error = await requester.get("structures").catch((e) => e);
+    const error = (await requester
+      .get("structures")
+      .catch((e: unknown) => e)) as DrugCentralApiError;
     expect(error).toBeInstanceOf(DrugCentralApiError);
     expect(error.status).toBe(500);
     expect(error.body).toBe("Internal Server Error");
@@ -124,7 +134,9 @@ describe("responses", () => {
     const { requester } = makeRequester([
       { status: 422, body: '{"detail":[{"loc":["query","limit"]}]}' },
     ]);
-    const error = await requester.get("structures").catch((e) => e);
+    const error = (await requester
+      .get("structures")
+      .catch((e: unknown) => e)) as DrugCentralApiError;
     expect(error).toBeInstanceOf(DrugCentralApiError);
     expect(error.status).toBe(422);
   });
@@ -133,9 +145,9 @@ describe("responses", () => {
     const { requester } = makeRequester([
       { status: 404, body: '{"detail":"struct_id not found"}' },
     ]);
-    const error = await requester
+    const error = (await requester
       .get("structures/id/999999999")
-      .catch((e) => e);
+      .catch((e: unknown) => e)) as DrugCentralNotFoundError;
     expect(error).toBeInstanceOf(DrugCentralNotFoundError);
     expect(error).toBeInstanceOf(DrugCentralApiError);
     expect(error.status).toBe(404);
@@ -151,7 +163,9 @@ describe("failure mapping", () => {
       timeoutMs: 15,
       fetch,
     });
-    const error = await requester.get("structures").catch((e) => e);
+    const error = (await requester
+      .get("structures")
+      .catch((e: unknown) => e)) as DrugCentralTimeoutError;
     expect(error).toBeInstanceOf(DrugCentralTimeoutError);
     expect(error.timeoutMs).toBe(15);
     expect(urls).toHaveLength(1);
@@ -161,7 +175,9 @@ describe("failure mapping", () => {
     const cause = new TypeError("fetch failed");
     const { fetch } = rejectingFetch(cause);
     const requester = new DrugCentralRequester({ baseUrl: BASE, fetch });
-    const error = await requester.get("structures").catch((e) => e);
+    const error = (await requester
+      .get("structures")
+      .catch((e: unknown) => e)) as DrugCentralNetworkError;
     expect(error).toBeInstanceOf(DrugCentralNetworkError);
     expect(error.cause).toBe(cause);
   });
@@ -176,7 +192,7 @@ describe("failure mapping", () => {
     const controller = new AbortController();
     const pending = requester.get("structures", undefined, controller.signal);
     controller.abort();
-    const error = await pending.catch((e) => e);
+    const error = (await pending.catch((e: unknown) => e)) as Error;
     expect(error).toBeInstanceOf(Error);
     expect(error.name).toBe("AbortError");
     expect(error).not.toBeInstanceOf(DrugCentralError);
@@ -196,7 +212,9 @@ describe("opt-in 5xx retry", () => {
 
   test("does not retry by default", async () => {
     const { requester, mock } = makeRequester([{ status: 500, body: "boom" }]);
-    const error = await requester.get("structures").catch((e) => e);
+    const error = (await requester
+      .get("structures")
+      .catch((e: unknown) => e)) as DrugCentralApiError;
     expect(error).toBeInstanceOf(DrugCentralApiError);
     expect(mock.urls).toHaveLength(1);
   });
@@ -205,7 +223,9 @@ describe("opt-in 5xx retry", () => {
     const { requester, mock } = makeRequester([{ status: 500, body: "boom" }], {
       maxRetries: 2,
     });
-    const error = await requester.get("structures").catch((e) => e);
+    const error = (await requester
+      .get("structures")
+      .catch((e: unknown) => e)) as DrugCentralApiError;
     expect(error).toBeInstanceOf(DrugCentralApiError);
     expect(mock.urls).toHaveLength(3);
   });
