@@ -1,0 +1,52 @@
+[
+  {
+    "ndc_product_code": "55111-695",
+    "product_name": "GLYBURIDE AND METFORMIN HYDROCHLORIDE",
+    "route": "ORAL",
+    "active_ingredient_count": 2,
+    "form": "TABLET",
+    "id": 2928251,
+    "generic_name": "GLYBURIDE AND METFORMIN HYDROCHLORIDE",
+    "marketing_status": "ANDA"
+  },
+  {
+    "ndc_product_code": "55111-696",
+    "product_name": "GLYBURIDE AND METFORMIN HYDROCHLORIDE",
+    "route": "ORAL",
+    "active_ingredient_count": 2,
+    "form": "TABLET",
+    "id": 2928252,
+    "generic_name": "GLYBURIDE AND METFORMIN HYDROCHLORIDE",
+    "marketing_status": "ANDA"
+  },
+  {
+    "ndc_product_code": "55111-697",
+    "product_name": "GLYBURIDE AND METFORMIN HYDROCHLORIDE",
+    "route": "ORAL",
+    "active_ingredient_count": 2,
+    "form": "TABLET",
+    "id": 2928253,
+    "generic_name": "GLYBURIDE AND METFORMIN HYDROCHLORIDE",
+    "marketing_status": "ANDA"
+  },
+  {
+    "ndc_product_code": "64679-810",
+    "product_name": "Baycadron",
+    "route": "ORAL",
+    "active_ingredient_count": 1,
+    "form": "ELIXIR",
+    "id": 2928254,
+    "generic_name": "Dexamethasone",
+    "marketing_status": "ANDA"
+  },
+  {
+    "ndc_product_code": "14789-300",
+    "product_name": "Benztropine Mesylate Injection, USP",
+    "route": "PARENTERAL",
+    "active_ingredient_count": 1,
+    "form": "INJECTION",
+    "id": 2928255,
+    "generic_name": "BENZTROPINE MESYLATE",
+    "marketing_status": "ANDA"
+  }
+]

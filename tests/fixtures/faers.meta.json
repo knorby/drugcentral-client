@@ -1,0 +1,9 @@
+{
+  "url": "https://uxn2ycvimg.us-east-2.awsapprunner.com/faers/struct_id/2391?limit=20",
+  "fetchedAt": "2026-10-03T20:16:32.936Z",
+  "rowsReceived": 832,
+  "rowsStored": 50,
+  "derived": true,
+  "note": "Upstream returned 832 rows; fixture truncated to 50.",
+  "sha256": "ed0685817b283f31910fc1d7acccf3cf6000131b41e96b2b89bbc3e7ac4b5159"
+}

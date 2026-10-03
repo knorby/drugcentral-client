@@ -1,0 +1,52 @@
+[
+  {
+    "swissprot": "ABCC8_RAT",
+    "name": "ATP-binding cassette sub-family C member 8",
+    "gene": "Abcc8",
+    "tdl": "Tclin",
+    "accession": "Q09429",
+    "id": 23634,
+    "organism": "Rattus norvegicus",
+    "geneid": 25559
+  },
+  {
+    "swissprot": "TRPM4_RAT",
+    "name": "Transient receptor potential cation channel subfamily M member 4",
+    "gene": "Trpm4",
+    "tdl": null,
+    "accession": "Q9ESQ5",
+    "id": 23635,
+    "organism": "Rattus norvegicus",
+    "geneid": 171143
+  },
+  {
+    "swissprot": "A0A113T0T6_PLABE",
+    "name": "6-hydroxymethyl-7,8-dihydropterin pyrophosphokinase",
+    "gene": "PPPK-DHPS",
+    "tdl": null,
+    "accession": "A0A113T0T6",
+    "id": 23636,
+    "organism": "Plasmodium berghei",
+    "geneid": null
+  },
+  {
+    "swissprot": "GYRB_MYCS2",
+    "name": "DNA gyrase subunit B",
+    "gene": "gyrB",
+    "tdl": null,
+    "accession": "A0QNE0",
+    "id": 23637,
+    "organism": "Mycolicibacterium smegmatis",
+    "geneid": null
+  },
+  {
+    "swissprot": "THIT_LACLM",
+    "name": "Thiamine transporter ThiT",
+    "gene": "thiT",
+    "tdl": null,
+    "accession": "A2RI47",
+    "id": 23638,
+    "organism": "Lactococcus lactis subsp. cremoris",
+    "geneid": null
+  }
+]

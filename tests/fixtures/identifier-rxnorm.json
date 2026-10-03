@@ -1,0 +1,352 @@
+[
+  {
+    "identifier": "259453",
+    "id": 1762385,
+    "id_type": "RXNORM",
+    "struct_id": 4,
+    "parent_match": null
+  },
+  {
+    "identifier": "1440263",
+    "id": 1762386,
+    "id_type": "RXNORM",
+    "struct_id": 21,
+    "parent_match": null
+  },
+  {
+    "identifier": "14852",
+    "id": 1762387,
+    "id_type": "RXNORM",
+    "struct_id": 22,
+    "parent_match": null
+  },
+  {
+    "identifier": "1545685",
+    "id": 1762388,
+    "id_type": "RXNORM",
+    "struct_id": 24,
+    "parent_match": null
+  },
+  {
+    "identifier": "1251",
+    "id": 1762389,
+    "id_type": "RXNORM",
+    "struct_id": 25,
+    "parent_match": null
+  },
+  {
+    "identifier": "202632",
+    "id": 1762390,
+    "id_type": "RXNORM",
+    "struct_id": 26,
+    "parent_match": null
+  },
+  {
+    "identifier": "227713",
+    "id": 1762391,
+    "id_type": "RXNORM",
+    "struct_id": 30,
+    "parent_match": null
+  },
+  {
+    "identifier": "190521",
+    "id": 1762392,
+    "id_type": "RXNORM",
+    "struct_id": 34,
+    "parent_match": null
+  },
+  {
+    "identifier": "301739",
+    "id": 1762393,
+    "id_type": "RXNORM",
+    "struct_id": 35,
+    "parent_match": null
+  },
+  {
+    "identifier": "152761",
+    "id": 1762394,
+    "id_type": "RXNORM",
+    "struct_id": 38,
+    "parent_match": null
+  },
+  {
+    "identifier": "151826",
+    "id": 1762395,
+    "id_type": "RXNORM",
+    "struct_id": 39,
+    "parent_match": null
+  },
+  {
+    "identifier": "142130",
+    "id": 1762396,
+    "id_type": "RXNORM",
+    "struct_id": 40,
+    "parent_match": null
+  },
+  {
+    "identifier": "16688",
+    "id": 1762397,
+    "id_type": "RXNORM",
+    "struct_id": 42,
+    "parent_match": null
+  },
+  {
+    "identifier": "16689",
+    "id": 1762398,
+    "id_type": "RXNORM",
+    "struct_id": 43,
+    "parent_match": null
+  },
+  {
+    "identifier": "1426379",
+    "id": 1762399,
+    "id_type": "RXNORM",
+    "struct_id": 46,
+    "parent_match": null
+  },
+  {
+    "identifier": "16695",
+    "id": 1762400,
+    "id_type": "RXNORM",
+    "struct_id": 47,
+    "parent_match": null
+  },
+  {
+    "identifier": "154",
+    "id": 1762401,
+    "id_type": "RXNORM",
+    "struct_id": 48,
+    "parent_match": null
+  },
+  {
+    "identifier": "161203",
+    "id": 1762402,
+    "id_type": "RXNORM",
+    "struct_id": 50,
+    "parent_match": null
+  },
+  {
+    "identifier": "161",
+    "id": 1762403,
+    "id_type": "RXNORM",
+    "struct_id": 52,
+    "parent_match": null
+  },
+  {
+    "identifier": "162",
+    "id": 1762404,
+    "id_type": "RXNORM",
+    "struct_id": 54,
+    "parent_match": null
+  },
+  {
+    "identifier": "167",
+    "id": 1762405,
+    "id_type": "RXNORM",
+    "struct_id": 56,
+    "parent_match": null
+  },
+  {
+    "identifier": "173",
+    "id": 1762406,
+    "id_type": "RXNORM",
+    "struct_id": 57,
+    "parent_match": null
+  },
+  {
+    "identifier": "16728",
+    "id": 1762407,
+    "id_type": "RXNORM",
+    "struct_id": 58,
+    "parent_match": null
+  },
+  {
+    "identifier": "16735",
+    "id": 1762408,
+    "id_type": "RXNORM",
+    "struct_id": 59,
+    "parent_match": null
+  },
+  {
+    "identifier": "16738",
+    "id": 1762409,
+    "id_type": "RXNORM",
+    "struct_id": 60,
+    "parent_match": null
+  },
+  {
+    "identifier": "16784",
+    "id": 1762410,
+    "id_type": "RXNORM",
+    "struct_id": 62,
+    "parent_match": null
+  },
+  {
+    "identifier": "193",
+    "id": 1762411,
+    "id_type": "RXNORM",
+    "struct_id": 64,
+    "parent_match": null
+  },
+  {
+    "identifier": "194",
+    "id": 1762412,
+    "id_type": "RXNORM",
+    "struct_id": 65,
+    "parent_match": null
+  },
+  {
+    "identifier": "197",
+    "id": 1762413,
+    "id_type": "RXNORM",
+    "struct_id": 66,
+    "parent_match": null
+  },
+  {
+    "identifier": "132871",
+    "id": 1762414,
+    "id_type": "RXNORM",
+    "struct_id": 67,
+    "parent_match": null
+  },
+  {
+    "identifier": "199",
+    "id": 1762415,
+    "id_type": "RXNORM",
+    "struct_id": 68,
+    "parent_match": null
+  },
+  {
+    "identifier": "2375522",
+    "id": 1762416,
+    "id_type": "RXNORM",
+    "struct_id": 71,
+    "parent_match": null
+  },
+  {
+    "identifier": "1114057",
+    "id": 1762417,
+    "id_type": "RXNORM",
+    "struct_id": 73,
+    "parent_match": null
+  },
+  {
+    "identifier": "1191",
+    "id": 1762418,
+    "id_type": "RXNORM",
+    "struct_id": 74,
+    "parent_match": null
+  },
+  {
+    "identifier": "16817",
+    "id": 1762419,
+    "id_type": "RXNORM",
+    "struct_id": 76,
+    "parent_match": null
+  },
+  {
+    "identifier": "16818",
+    "id": 1762420,
+    "id_type": "RXNORM",
+    "struct_id": 78,
+    "parent_match": null
+  },
+  {
+    "identifier": "239",
+    "id": 1762421,
+    "id_type": "RXNORM",
+    "struct_id": 80,
+    "parent_match": null
+  },
+  {
+    "identifier": "19959",
+    "id": 1762422,
+    "id_type": "RXNORM",
+    "struct_id": 82,
+    "parent_match": null
+  },
+  {
+    "identifier": "151711",
+    "id": 1762423,
+    "id_type": "RXNORM",
+    "struct_id": 83,
+    "parent_match": null
+  },
+  {
+    "identifier": "152535",
+    "id": 1762424,
+    "id_type": "RXNORM",
+    "struct_id": 85,
+    "parent_match": null
+  },
+  {
+    "identifier": "153184",
+    "id": 1762425,
+    "id_type": "RXNORM",
+    "struct_id": 87,
+    "parent_match": null
+  },
+  {
+    "identifier": "141400",
+    "id": 1762426,
+    "id_type": "RXNORM",
+    "struct_id": 88,
+    "parent_match": null
+  },
+  {
+    "identifier": "290",
+    "id": 1762427,
+    "id_type": "RXNORM",
+    "struct_id": 89,
+    "parent_match": null
+  },
+  {
+    "identifier": "215025",
+    "id": 1762428,
+    "id_type": "RXNORM",
+    "struct_id": 90,
+    "parent_match": null
+  },
+  {
+    "identifier": "296",
+    "id": 1762429,
+    "id_type": "RXNORM",
+    "struct_id": 91,
+    "parent_match": true
+  },
+  {
+    "identifier": "296",
+    "id": 1762430,
+    "id_type": "RXNORM",
+    "struct_id": 92,
+    "parent_match": true
+  },
+  {
+    "identifier": "235433",
+    "id": 1762431,
+    "id_type": "RXNORM",
+    "struct_id": 94,
+    "parent_match": null
+  },
+  {
+    "identifier": "45938",
+    "id": 1762432,
+    "id_type": "RXNORM",
+    "struct_id": 95,
+    "parent_match": null
+  },
+  {
+    "identifier": "17073",
+    "id": 1762433,
+    "id_type": "RXNORM",
+    "struct_id": 96,
+    "parent_match": null
+  },
+  {
+    "identifier": "423",
+    "id": 1762434,
+    "id_type": "RXNORM",
+    "struct_id": 100,
+    "parent_match": null
+  }
+]

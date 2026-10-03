@@ -1,0 +1,72 @@
+[
+  {
+    "code": "A01AA01",
+    "l1_code": "A",
+    "l2_code": "A01",
+    "l2_name": "STOMATOLOGICAL PREPARATIONS",
+    "l3_name": "STOMATOLOGICAL PREPARATIONS",
+    "l4_name": "Caries prophylactic agents",
+    "id": 1,
+    "chemical_substance": "sodium fluoride",
+    "l1_name": "ALIMENTARY TRACT AND METABOLISM",
+    "l3_code": "A01A",
+    "l4_code": "A01AA",
+    "chemical_substance_count": 1
+  },
+  {
+    "code": "A01AA02",
+    "l1_code": "A",
+    "l2_code": "A01",
+    "l2_name": "STOMATOLOGICAL PREPARATIONS",
+    "l3_name": "STOMATOLOGICAL PREPARATIONS",
+    "l4_name": "Caries prophylactic agents",
+    "id": 2,
+    "chemical_substance": "sodium monofluorophosphate",
+    "l1_name": "ALIMENTARY TRACT AND METABOLISM",
+    "l3_code": "A01A",
+    "l4_code": "A01AA",
+    "chemical_substance_count": 1
+  },
+  {
+    "code": "A01AA03",
+    "l1_code": "A",
+    "l2_code": "A01",
+    "l2_name": "STOMATOLOGICAL PREPARATIONS",
+    "l3_name": "STOMATOLOGICAL PREPARATIONS",
+    "l4_name": "Caries prophylactic agents",
+    "id": 3,
+    "chemical_substance": "olaflur",
+    "l1_name": "ALIMENTARY TRACT AND METABOLISM",
+    "l3_code": "A01A",
+    "l4_code": "A01AA",
+    "chemical_substance_count": 1
+  },
+  {
+    "code": "A01AA04",
+    "l1_code": "A",
+    "l2_code": "A01",
+    "l2_name": "STOMATOLOGICAL PREPARATIONS",
+    "l3_name": "STOMATOLOGICAL PREPARATIONS",
+    "l4_name": "Caries prophylactic agents",
+    "id": 4,
+    "chemical_substance": "stannous fluoride",
+    "l1_name": "ALIMENTARY TRACT AND METABOLISM",
+    "l3_code": "A01A",
+    "l4_code": "A01AA",
+    "chemical_substance_count": 1
+  },
+  {
+    "code": "A01AA30",
+    "l1_code": "A",
+    "l2_code": "A01",
+    "l2_name": "STOMATOLOGICAL PREPARATIONS",
+    "l3_name": "STOMATOLOGICAL PREPARATIONS",
+    "l4_name": "Caries prophylactic agents",
+    "id": 5,
+    "chemical_substance": "combinations",
+    "l1_name": "ALIMENTARY TRACT AND METABOLISM",
+    "l3_code": "A01A",
+    "l4_code": "A01AA",
+    "chemical_substance_count": 0
+  }
+]

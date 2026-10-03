@@ -58,6 +58,23 @@ export class DrugCentralInvalidResponseError extends DrugCentralError {
 }
 
 /**
+ * The DrugCentral behavior where a path filter that matches **zero** rows is
+ * reported as HTTP 404 with a `{"detail":"… not found"}` JSON body — not as
+ * an empty array (verified live across structures/faers/synonyms/
+ * omop_relationship/atc on 2026-10-03).
+ *
+ * Catch this to treat "no matches" as a normal outcome (e.g. resolve to
+ * `[]`); a 404 never means the data is safe or that the record was checked.
+ */
+export class DrugCentralNotFoundError extends DrugCentralApiError {
+  constructor(params: { body: string; url: string }) {
+    super({ status: 404, ...params });
+    this.name = "DrugCentralNotFoundError";
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+/**
  * A request that exceeded the configured `timeoutMs` and was aborted via
  * `AbortController`.
  */

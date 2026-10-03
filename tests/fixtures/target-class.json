@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "l1": "Parasite"
+  },
+  {
+    "id": 2,
+    "l1": "Drug"
+  },
+  {
+    "id": 3,
+    "l1": "Glycoprotein"
+  },
+  {
+    "id": 4,
+    "l1": "Tumour-associated antigen"
+  },
+  {
+    "id": 5,
+    "l1": "Viral envelope protein"
+  }
+]

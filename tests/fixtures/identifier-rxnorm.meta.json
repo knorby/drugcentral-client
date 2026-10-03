@@ -1,0 +1,9 @@
+{
+  "url": "https://uxn2ycvimg.us-east-2.awsapprunner.com/identifier/id_type/RXNORM?limit=2",
+  "fetchedAt": "2026-10-03T20:16:28.431Z",
+  "rowsReceived": 3525,
+  "rowsStored": 50,
+  "derived": true,
+  "note": "Upstream returned 3525 rows; fixture truncated to 50. Evidence for the unhonored-limit quirk: upstream ignores the requested limit. (requested limit 2 returned 3525 rows)",
+  "sha256": "4df7047873a6f302faf990165b191c88ce8d60d561e1d3f1dd968e6fc74e8d88"
+}

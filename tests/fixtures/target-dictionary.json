@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Sur1-Trpm4; Sulfonylurea receptor 1 - Transient receptor potential melastatin 4",
+    "protein_components": 2,
+    "protein_type": "PROTEIN COMPLEX GROUP",
+    "tdl": "Tclin",
+    "id": 4502,
+    "target_class": "Ion channel"
+  },
+  {
+    "name": "Tyrosinase",
+    "protein_components": 1,
+    "protein_type": "SINGLE PROTEIN",
+    "tdl": null,
+    "id": 4503,
+    "target_class": "Unclassified"
+  },
+  {
+    "name": "Eyes absent homolog 2",
+    "protein_components": 1,
+    "protein_type": "SINGLE PROTEIN",
+    "tdl": "Tbio",
+    "id": 4504,
+    "target_class": "Enzyme"
+  },
+  {
+    "name": "Butyrophilin subfamily 3 member A1",
+    "protein_components": 1,
+    "protein_type": "SINGLE PROTEIN",
+    "tdl": "Tbio",
+    "id": 4505,
+    "target_class": "Antibody"
+  },
+  {
+    "name": "Free fatty acid receptor 3",
+    "protein_components": 1,
+    "protein_type": "SINGLE PROTEIN",
+    "tdl": "Tchem",
+    "id": 4506,
+    "target_class": "GPCR"
+  }
+]

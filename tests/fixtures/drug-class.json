@@ -1,0 +1,32 @@
+[
+  {
+    "id": 7740,
+    "name": "Monoamine Oxidase Inhibitors",
+    "source": "LEXICOMP",
+    "is_group": 1
+  },
+  {
+    "id": 7741,
+    "name": "Alpha/Beta Agonists",
+    "source": "LEXICOMP",
+    "is_group": 1
+  },
+  {
+    "id": 7742,
+    "name": "Amphetamines",
+    "source": "LEXICOMP",
+    "is_group": 1
+  },
+  {
+    "id": 7743,
+    "name": "Inhalational Anesthetics",
+    "source": "LEXICOMP",
+    "is_group": 1
+  },
+  {
+    "id": 7744,
+    "name": "Reversible Inhibitors of MAO-A",
+    "source": "LEXICOMP",
+    "is_group": 1
+  }
+]

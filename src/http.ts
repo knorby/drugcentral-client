@@ -10,6 +10,7 @@ import {
   DrugCentralError,
   DrugCentralInvalidResponseError,
   DrugCentralNetworkError,
+  DrugCentralNotFoundError,
   DrugCentralTimeoutError,
 } from "./errors";
 import { buildQueryString } from "./utils/serialize";
@@ -142,11 +143,11 @@ export class DrugCentralRequester {
     return this.request(path, params, signal, async (response) => {
       const text = await response.text();
       if (!response.ok) {
-        throw new DrugCentralApiError({
-          status: response.status,
-          body: text,
-          url: response.url || this.buildUrl(path, params),
-        });
+        throw this.apiError(
+          response.status,
+          text,
+          response.url || this.buildUrl(path, params),
+        );
       }
       try {
         return JSON.parse(text) as TR;
@@ -172,11 +173,11 @@ export class DrugCentralRequester {
     return this.request(path, params, signal, (response) => {
       if (!response.ok) {
         return response.text().then((text) => {
-          throw new DrugCentralApiError({
-            status: response.status,
-            body: text,
-            url: response.url || this.buildUrl(path, params),
-          });
+          throw this.apiError(
+            response.status,
+            text,
+            response.url || this.buildUrl(path, params),
+          );
         });
       }
       return response.text();
@@ -189,6 +190,21 @@ export class DrugCentralRequester {
     return query
       ? `${this.baseUrl}/${path}?${query}`
       : `${this.baseUrl}/${path}`;
+  }
+
+  /**
+   * Maps a non-2xx status to a typed error: 404s become
+   * {@link DrugCentralNotFoundError} (DrugCentral's no-match behavior),
+   * everything else a plain {@link DrugCentralApiError}.
+   */
+  private apiError(
+    status: number,
+    body: string,
+    url: string,
+  ): DrugCentralApiError {
+    return status === 404
+      ? new DrugCentralNotFoundError({ body, url })
+      : new DrugCentralApiError({ status, body, url });
   }
 
   /**

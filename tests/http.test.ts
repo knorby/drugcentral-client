@@ -5,6 +5,7 @@ import {
   DrugCentralError,
   DrugCentralInvalidResponseError,
   DrugCentralNetworkError,
+  DrugCentralNotFoundError,
   DrugCentralTimeoutError,
 } from "../src/errors";
 import { DrugCentralRequester } from "../src/http";
@@ -126,6 +127,19 @@ describe("responses", () => {
     const error = await requester.get("structures").catch((e) => e);
     expect(error).toBeInstanceOf(DrugCentralApiError);
     expect(error.status).toBe(422);
+  });
+
+  test("404 with a not-found detail body throws DrugCentralNotFoundError", async () => {
+    const { requester } = makeRequester([
+      { status: 404, body: '{"detail":"struct_id not found"}' },
+    ]);
+    const error = await requester
+      .get("structures/id/999999999")
+      .catch((e) => e);
+    expect(error).toBeInstanceOf(DrugCentralNotFoundError);
+    expect(error).toBeInstanceOf(DrugCentralApiError);
+    expect(error.status).toBe(404);
+    expect(error.message).toContain("struct_id not found");
   });
 });
 

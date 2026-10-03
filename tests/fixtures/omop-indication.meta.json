@@ -1,0 +1,9 @@
+{
+  "url": "https://uxn2ycvimg.us-east-2.awsapprunner.com/omop_relationship/relationship_name/indication?limit=5",
+  "fetchedAt": "2026-10-03T20:16:32.336Z",
+  "rowsReceived": 39778,
+  "rowsStored": 50,
+  "derived": true,
+  "note": "Upstream returned 39778 rows; fixture truncated to 50.",
+  "sha256": "7aca719e595811f05b10c2e00620e0cb4f9105909ee06c98b8d4c41cf1e06aa1"
+}
