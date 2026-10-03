@@ -1,4 +1,13 @@
 import { DrugCentralError } from "./errors";
+import {
+  createFaersResource,
+  createOmopRelationshipsResource,
+} from "./resources/knowledge";
+import { createTargetActivityResource } from "./resources/targets";
+import type { OmopRelationship } from "./types/omop";
+import type { FaersPopulation, FaersSignal } from "./types/faers";
+import type { ActTableFullEntry } from "./types/targets";
+import type { FaersOptions } from "./resources/knowledge";
 import type { DrugCentralRequester } from "./http";
 import {
   createIdTypesResource,
@@ -92,6 +101,11 @@ export interface StructureProfile {
   drugClasses: DrugClass[];
 }
 
+/** A FAERS signal stamped with the report-population stratum it came from. */
+export type PopulationStampedSignal = FaersSignal & {
+  population: FaersPopulation;
+};
+
 /** Builds the provenance envelope shared by every guided result. */
 function provenance(
   endpoint: string,
@@ -131,6 +145,9 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
   const products = createProductsResource(requester);
   const struct2obprod = createStruct2ObprodResource(requester);
   const struct2atc = createStruct2AtcResource(requester);
+  const omopRelationships = createOmopRelationshipsResource(requester);
+  const faers = createFaersResource(requester);
+  const targetActivity = createTargetActivityResource(requester);
   void idTypes; // exposed for future guided helpers; namespaces stay public
 
   return {
@@ -309,6 +326,103 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
           "structures/id/{id}; identifier|synonyms|struct2obprod|struct2atc by struct",
           structId,
         ),
+      };
+    },
+
+    /**
+     * Drug–condition relationships for one structure, preserving the verbatim
+     * `relationship_name` on every record. `kinds` filters by **exact string
+     * equality** client-side — never the upstream substring-matching
+     * relationship filter (see the omop resource warning). Inclusion in
+     * DrugCentral is not regulator approval; these rows carry no patient
+     * predicates, severity, or management guidance.
+     */
+    async getConditionRelationships(
+      structId: number,
+      opts?: { kinds?: string[] },
+    ): Promise<GuidedResult<OmopRelationship[]>> {
+      const rows = await tolerateNotFound(
+        omopRelationships.byStructId(structId),
+      );
+      const data =
+        opts?.kinds === undefined
+          ? (rows as OmopRelationship[])
+          : (rows as OmopRelationship[]).filter((row) =>
+              opts.kinds?.includes(row.relationship_name),
+            );
+      return {
+        data,
+        provenance: provenance("omop_relationship/struct_id/{id}", structId),
+      };
+    },
+
+    /** Relationships labeled exactly `"indication"`. */
+    getIndications(
+      structId: number,
+    ): Promise<GuidedResult<OmopRelationship[]>> {
+      return this.getConditionRelationships(structId, {
+        kinds: ["indication"],
+      });
+    },
+
+    /** Relationships labeled exactly `"off-label use"`. */
+    getOffLabelUses(
+      structId: number,
+    ): Promise<GuidedResult<OmopRelationship[]>> {
+      return this.getConditionRelationships(structId, {
+        kinds: ["off-label use"],
+      });
+    },
+
+    /** Relationships labeled exactly `"contraindication"`. */
+    getContraindications(
+      structId: number,
+    ): Promise<GuidedResult<OmopRelationship[]>> {
+      return this.getConditionRelationships(structId, {
+        kinds: ["contraindication"],
+      });
+    },
+
+    /**
+     * FAERS adverse-event signals for one structure, stamped with the
+     * report-population stratum. These are disproportionality statistics —
+     * report contingencies, **not incidence rates**, and never causality.
+     * Empty results mean "no signal rows", never "no risk".
+     */
+    async getFaersSignals(
+      structId: number,
+      opts?: FaersOptions,
+    ): Promise<GuidedResult<PopulationStampedSignal[]>> {
+      const rows = await tolerateNotFound(
+        faers.byStructId(structId, { population: opts?.population }),
+      );
+      const population: FaersPopulation = opts?.population ?? "all";
+      return {
+        data: (rows as FaersSignal[]).map((row) => ({
+          ...row,
+          population,
+        })),
+        provenance: provenance(
+          `faers${population === "all" ? "" : `_${population}`}/struct_id/{id}`,
+          structId,
+        ),
+      };
+    },
+
+    /**
+     * Drug–**target** activity for one structure: what the compound does to
+     * proteins, with action types and MoA provenance. Distinct from
+     * drug–drug interaction — no pairwise DDI semantics exist here.
+     */
+    async getTargetActivity(
+      structId: number,
+    ): Promise<GuidedResult<ActTableFullEntry[]>> {
+      const rows = await tolerateNotFound(
+        targetActivity.byStructId(structId),
+      );
+      return {
+        data: rows as ActTableFullEntry[],
+        provenance: provenance("act_table_full/struct_id/{id}", structId),
       };
     },
   };
