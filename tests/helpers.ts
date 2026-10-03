@@ -104,9 +104,21 @@ export function routingFetch(routes: Record<string, unknown>) {
     urls.push(String(url));
     const path = String(url).split("?")[0] ?? "";
     const base = path.replace(/^https?:\/\/[^/]+\/?/, "");
-    if (base in routes) {
+    const route =
+      base in routes
+        ? routes[base]
+        : (() => {
+            // URLs arrive percent-encoded; accept decoded keys too.
+            try {
+              const decoded = decodeURIComponent(base);
+              return decoded in routes ? routes[decoded] : undefined;
+            } catch {
+              return undefined;
+            }
+          })();
+    if (route !== undefined) {
       return Promise.resolve(
-        new Response(JSON.stringify(routes[base]), {
+        new Response(JSON.stringify(route), {
           headers: { "Content-Type": "application/json" },
         }),
       );
