@@ -92,3 +92,32 @@ export function rejectingFetch(cause: unknown = new TypeError("fetch failed")) {
   };
   return { fetch: fn as unknown as typeof fetch, urls };
 }
+
+/**
+ * A fetch mock that routes by URL: keys are paths (query-string-free) and
+ * values are JSON bodies. Unmatched paths return DrugCentral's no-match 404
+ * (`{"detail":"… not found"}`), so guided 404-tolerance is exercisable.
+ */
+export function routingFetch(routes: Record<string, unknown>) {
+  const urls: string[] = [];
+  const fn = (url: string | URL | Request): Promise<Response> => {
+    urls.push(String(url));
+    const path = String(url).split("?")[0] ?? "";
+    const base = path.replace(/^https?:\/\/[^/]+\/?/, "");
+    if (base in routes) {
+      return Promise.resolve(
+        new Response(JSON.stringify(routes[base]), {
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    }
+    return Promise.resolve(
+      new Response('{"detail":"not found"}', {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+  };
+  return { fetch: fn as unknown as typeof fetch, urls };
+}
+
