@@ -17,7 +17,6 @@ import {
 } from "./resources/knowledge";
 import { createTargetActivityResource } from "./resources/targets";
 import type {
-  DrugClass,
   Struct2Atc,
   Struct2Obprod,
 } from "./types/classification";
@@ -92,12 +91,6 @@ export interface StructureProfile {
   obprodLinks: Struct2Obprod[];
   /** ATC code assignments (via struct2atc). */
   atc: Struct2Atc[];
-  /**
-   * Pharmacologic classes. Always `[]` today: this API version exposes no
-   * path from a structure to `drug_class` rows (the table filters by
-   * id/name/source only). Reserved so consumers can rely on the shape.
-   */
-  drugClasses: DrugClass[];
 }
 
 /** A FAERS signal stamped with the report-population stratum it came from. */
@@ -302,7 +295,6 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
           synonyms: synonymRows as Synonym[],
           obprodLinks: links as Struct2Obprod[],
           atc: atcRows as Struct2Atc[],
-          drugClasses: [],
         },
         provenance: provenance(
           "structures/id/{id}; identifier|synonyms|struct2obprod|struct2atc by struct",
@@ -315,25 +307,29 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
      * Drug–condition relationships for one structure, preserving the verbatim
      * `relationship_name` on every record. `kinds` filters by **exact string
      * equality** client-side — never the upstream substring-matching
-     * relationship filter (see the omop resource warning). Inclusion in
-     * DrugCentral is not regulator approval; these rows carry no patient
-     * predicates, severity, or management guidance.
+     * relationship filter (see the omop resource warning). `limit` caps the
+     * result client-side with `truncated: true` when capping drops rows —
+     * upstream ignores `limit` on filtered endpoints, so capping cannot be
+     * delegated. Inclusion in DrugCentral is not regulator approval; these
+     * rows carry no patient predicates, severity, or management guidance.
      */
     async getConditionRelationships(
       structId: number,
-      opts?: { kinds?: string[] },
+      opts?: { kinds?: string[]; limit?: number },
     ): Promise<GuidedResult<OmopRelationship[]>> {
       const rows = await tolerateNotFound(
         omopRelationships.byStructId(structId),
       );
-      const data =
+      const filtered =
         opts?.kinds === undefined
           ? (rows as OmopRelationship[])
           : (rows as OmopRelationship[]).filter((row) =>
               opts.kinds?.includes(row.relationship_name),
             );
+      const capped = opts?.limit !== undefined && filtered.length > opts.limit;
       return {
-        data,
+        data: capped ? filtered.slice(0, opts.limit) : filtered,
+        ...(capped ? { truncated: true } : {}),
         provenance: provenance("omop_relationship/struct_id/{id}", structId),
       };
     },
@@ -341,27 +337,33 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
     /** Relationships labeled exactly `"indication"`. */
     getIndications(
       structId: number,
+      opts?: { limit?: number },
     ): Promise<GuidedResult<OmopRelationship[]>> {
       return this.getConditionRelationships(structId, {
         kinds: ["indication"],
+        ...opts,
       });
     },
 
     /** Relationships labeled exactly `"off-label use"`. */
     getOffLabelUses(
       structId: number,
+      opts?: { limit?: number },
     ): Promise<GuidedResult<OmopRelationship[]>> {
       return this.getConditionRelationships(structId, {
         kinds: ["off-label use"],
+        ...opts,
       });
     },
 
     /** Relationships labeled exactly `"contraindication"`. */
     getContraindications(
       structId: number,
+      opts?: { limit?: number },
     ): Promise<GuidedResult<OmopRelationship[]>> {
       return this.getConditionRelationships(structId, {
         kinds: ["contraindication"],
+        ...opts,
       });
     },
 

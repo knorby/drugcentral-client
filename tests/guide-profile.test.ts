@@ -87,6 +87,17 @@ function profileRoutes() {
 }
 
 describe("guide.getStructureProfile", () => {
+  test("profile carries no dead fields (drugClasses removed pre-release)", async () => {
+    const client = createDrugCentralClient({
+      baseUrl: "https://x.test",
+      fetch: routingFetch(profileRoutes()).fetch,
+    });
+    const { data } = await client.guide.getStructureProfile(102);
+    // The field was always [] (no upstream struct->drug_class path); it was
+    // removed rather than shipped as a dead public contract.
+    expect("drugClasses" in data).toBe(false);
+  });
+
   test("assembles the full profile across tables", async () => {
     const { client } = {
       client: createDrugCentralClient({
@@ -108,7 +119,6 @@ describe("guide.getStructureProfile", () => {
     expect(data.obprodLinks.map((l) => l.prod_id)).toEqual([683206, 683207]);
     expect(data.obprodLinks[0]?.strength).toBe("EQ 200MG BASE/VIAL");
     expect(data.atc.map((a) => a.atc_code)).toEqual(["R05CB01"]);
-    expect(data.drugClasses).toEqual([]);
     expect(provenance.structId).toBe(102);
     expect(provenance.sourceVersion).toBeNull();
   });
@@ -125,7 +135,6 @@ describe("guide.getStructureProfile", () => {
     expect(data.synonyms).toEqual([]);
     expect(data.obprodLinks).toEqual([]);
     expect(data.atc).toEqual([]);
-    expect(data.drugClasses).toEqual([]);
     expect(provenance.structId).toBe(999999999);
   });
 

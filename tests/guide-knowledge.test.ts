@@ -39,6 +39,17 @@ const RELATIONSHIPS: OmopRelationship[] = [
     umls_cui: null,
     cui_semantic_type: null,
   },
+  {
+    id: 174027,
+    struct_id: 5391,
+    relationship_name: "indication",
+    concept_id: 40249431,
+    concept_name: "Urothelial carcinoma",
+    snomed_full_name: null,
+    snomed_conceptid: null,
+    umls_cui: null,
+    cui_semantic_type: null,
+  },
 ];
 
 const FAERS_ROWS: FaersSignal[] = [
@@ -101,7 +112,7 @@ describe("guide.getConditionRelationships", () => {
     });
     const { data, provenance } =
       await client.guide.getConditionRelationships(5391);
-    expect(data).toHaveLength(3);
+    expect(data).toHaveLength(4);
     expect(new Set(data.map((r) => r.relationship_name))).toEqual(
       new Set(["indication", "off-label use", "contraindication"]),
     );
@@ -117,8 +128,8 @@ describe("guide.getConditionRelationships", () => {
     });
     // "contraindication" must NOT leak into an "indication" kind filter —
     // the upstream relationship_name endpoint would substring-match it.
-    expect(data).toHaveLength(1);
-    expect(data[0]?.relationship_name).toBe("indication");
+    expect(data).toHaveLength(2);
+    expect(data.every((r) => r.relationship_name === "indication")).toBe(true);
     // Untouched records keep their verbatim labels.
     expect(RELATIONSHIPS[1]?.relationship_name).toBe("off-label use");
   });
@@ -131,7 +142,7 @@ describe("guide.getConditionRelationships", () => {
       (await client.guide.getIndications(5391)).data.map(
         (r) => r.relationship_name,
       ),
-    ).toEqual(["indication"]);
+    ).toEqual(["indication", "indication"]);
     expect(
       (await client.guide.getOffLabelUses(5391)).data.map(
         (r) => r.relationship_name,
@@ -142,6 +153,25 @@ describe("guide.getConditionRelationships", () => {
         (r) => r.relationship_name,
       ),
     ).toEqual(["contraindication"]);
+  });
+
+  test("limit caps results client-side with labeled truncation", async () => {
+    const client = makeClient({
+      "omop_relationship/struct_id/5391": RELATIONSHIPS,
+    });
+    const capped = await client.guide.getConditionRelationships(5391, {
+      limit: 2,
+    });
+    expect(capped.data).toHaveLength(2);
+    expect(capped.truncated).toBe(true);
+
+    const convenience = await client.guide.getIndications(5391, { limit: 1 });
+    expect(convenience.data).toHaveLength(1);
+    expect(convenience.truncated).toBe(true);
+
+    // No cap when under the limit — no truncation marker.
+    const under = await client.guide.getOffLabelUses(5391, { limit: 50 });
+    expect(under.truncated).toBeUndefined();
   });
 
   test("unknown structure yields [] without error", async () => {

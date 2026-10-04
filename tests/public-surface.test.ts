@@ -107,7 +107,6 @@ describe("public export surface", () => {
       synonyms: [],
       obprodLinks: [],
       atc: [],
-      drugClasses: [],
     };
     const signal: PopulationStampedSignal = {
       id: 1,
