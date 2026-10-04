@@ -16,10 +16,7 @@ import {
   createOmopRelationshipsResource,
 } from "./resources/knowledge";
 import { createTargetActivityResource } from "./resources/targets";
-import type {
-  Struct2Atc,
-  Struct2Obprod,
-} from "./types/classification";
+import type { Struct2Atc, Struct2Obprod } from "./types/classification";
 import type { FaersPopulation, FaersSignal } from "./types/faers";
 import type { IdentifierRecord } from "./types/identifiers";
 import type { OmopRelationship } from "./types/omop";

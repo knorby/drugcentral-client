@@ -8,6 +8,8 @@ Covers every DrugCentral DRS resource group (structures, synonyms, identifier cr
 
 > **Not affiliated.** This is an unofficial client. It is not maintained by DrugCentral or the University of New Mexico.
 
+> **Host stability.** The default API host is an App Runner deployment observed 2026-10-03 and is **not guaranteed stable**. Treat `baseUrl` as configuration you will eventually override — check the API link on [drugcentral.org](https://drugcentral.org) if requests suddenly fail, and point your app at the current host.
+
 ## About DrugCentral — and thank you
 
 [DrugCentral](https://drugcentral.org) is a drug information resource maintained by the University of New Mexico, offering "information on active ingredients, chemical entities, pharmaceutical products, drug mode of action, indications, pharmacologic action" plus drug–target interaction data. This library exists because DrugCentral publishes an open API over that work — **thank you, DrugCentral team**.
@@ -119,9 +121,13 @@ List endpoints take `skip`/`limit`. Two verified quirks shape the client's behav
 1. **Some filtered endpoints ignore `limit`** and stream the entire table (e.g. `/identifier/id_type/RXNORM?limit=2` returns all ~3.5k rows). `getAll` detects a response longer than the requested limit, treats it as a complete single-page dump, and stops — it never loops.
 2. **`maxPages` stops are labeled truncation.** An iteration that stopped on `maxPages` found everything up to that point, not everything upstream.
 
+Guided methods that accept `limit` (`searchStructuresByName`, `getConditionRelationships` and its kind wrappers) cap results **client-side** (upstream filtered endpoints ignore `limit`) and mark the envelope with `truncated: true` when capping drops rows — truncation is labeled, never implied complete.
+
 ## Errors
 
 Every failure is a `DrugCentralError` subclass: `DrugCentralApiError` (non-2xx; `.status`, `.body`, `.url`), `DrugCentralNotFoundError` (DrugCentral reports **no-match path filters as HTTP 404** — catch this to treat "no rows" as a normal outcome; it never means the data was checked or is safe), `DrugCentralInvalidResponseError` (the observed transient non-JSON bodies), `DrugCentralTimeoutError`, `DrugCentralNetworkError`. Consumer aborts re-throw the original `AbortError` unwrapped.
+
+**No-match contract (pinned in tests — safe to rely on).** Upstream reports no-match path filters as HTTP 404. Resource-level methods surface `DrugCentralNotFoundError`; guided-layer methods that can legitimately see zero rows (`searchStructuresByName`, `resolveIdentifier`/`resolveByRxcui`/`resolveByUnii`, `getConditionRelationships` + kind wrappers, `getFaersSignals`, `getTargetActivity`) normalize no-match to `data: []` with a provenance envelope, and `getStructureProfile` resolves `structure: null` + empty sections — never an error. Empty means "no rows matched", never "safe".
 
 ## Capability matrix
 
@@ -132,7 +138,7 @@ Every failure is a `DrugCentralError` subclass: `DrugCentralApiError` (non-2xx; 
 | Resolve NDCs to structures | `guide.resolveByNdc` | ❌ unsupported upstream (throws, documented) |
 | Drug–condition relationships with verbatim labels | `guide.getConditionRelationships`, `getIndications`, `getOffLabelUses`, `getContraindications` | ✅ |
 | FAERS signals, population-stratified | `guide.getFaersSignals` | ✅ (3 strata only — see gaps) |
-| Classification & descriptions | `guide.getStructureProfile`, `client.atc`, `client.drugClasses` | ✅ |
+| Classification & descriptions | `guide.getStructureProfile` (ATC), `client.atc`, `client.drugClasses` | ✅ |
 | Drug–target activity (≠ DDI) | `guide.getTargetActivity`, `client.targetActivity` | ✅ |
 | Provenance on every guided result | `{ data, provenance }` envelope | ✅ (source version: not supplied upstream) |
 
