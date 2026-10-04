@@ -39,6 +39,30 @@ export {
   type QueryParamValue,
 } from "./http";
 export { type PaginateOptions, paginateAll } from "./pagination";
-export type * from "./types";
+export type {
+  ActTableFullEntry,
+  AtcCode,
+  DrugClass,
+  DrugStructure,
+  FaersPopulation,
+  FaersSignal,
+  GuidedResult,
+  IdType,
+  IdentifierRecord,
+  OmopRelationship,
+  Product,
+  Provenance,
+  Struct2Atc,
+  Struct2Obprod,
+  Synonym,
+  TargetClass,
+  TargetComponent,
+  TargetDictionary,
+  TargetGo,
+  TargetKeyword,
+  Td2Tc,
+  Tdgo2Tc,
+  Tdkey2Tc,
+} from "./types";
 export { KNOWN_RELATIONSHIP_NAMES } from "./types/omop";
 export { buildQueryString } from "./utils/serialize";

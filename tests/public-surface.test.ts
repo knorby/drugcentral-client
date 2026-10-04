@@ -3,10 +3,13 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import {
   createDrugCentralClient,
+  type GuidedResult,
   type IdentifierMatch,
   KNOWN_IDENTIFIER_TYPES,
   KNOWN_RELATIONSHIP_NAMES,
+  type OmopRelationship,
   type PopulationStampedSignal,
+  type Provenance,
   type StructureCandidate,
   type StructureProfile,
 } from "../src/index";
@@ -22,6 +25,67 @@ describe("public export surface", () => {
   test("KNOWN_IDENTIFIER_TYPES is a value export", () => {
     expect(KNOWN_IDENTIFIER_TYPES).toContain("RXNORM");
     expect(KNOWN_IDENTIFIER_TYPES).toContain("UNII");
+  });
+
+  test("record types are importable by name (no star-export-only types)", () => {
+    // Ritualog regression: the guided row types must be named imports, not
+    // derived via Awaited<ReturnType<...>> workarounds.
+    const relationship: OmopRelationship = {
+      id: 1,
+      struct_id: 1,
+      relationship_name: "indication",
+      concept_id: 1,
+      concept_name: "x",
+      snomed_full_name: null,
+      snomed_conceptid: null,
+      umls_cui: null,
+      cui_semantic_type: null,
+    };
+    const provenance: Provenance = {
+      source: "drugcentral",
+      endpoint: "omop_relationship/struct_id/{id}",
+      retrievedAt: "2026-10-04T00:00:00.000Z",
+      sourceVersion: null,
+    };
+    const result: GuidedResult<OmopRelationship[]> = {
+      data: [relationship],
+      provenance,
+    };
+    expect(result.data[0]?.relationship_name).toBe("indication");
+  });
+
+  test("shipped d.ts exposes every record type by name", async () => {
+    const distTypes = readFileSync(
+      join(import.meta.dirname, "../dist/index.d.ts"),
+      "utf8",
+    );
+    for (const name of [
+      "OmopRelationship",
+      "DrugStructure",
+      "Synonym",
+      "IdentifierRecord",
+      "IdType",
+      "Product",
+      "AtcCode",
+      "DrugClass",
+      "Struct2Atc",
+      "Struct2Obprod",
+      "FaersSignal",
+      "FaersPopulation",
+      "ActTableFullEntry",
+      "TargetDictionary",
+      "TargetComponent",
+      "TargetGo",
+      "TargetKeyword",
+      "TargetClass",
+      "Td2Tc",
+      "Tdgo2Tc",
+      "Tdkey2Tc",
+      "Provenance",
+      "GuidedResult",
+    ]) {
+      expect(distTypes).toMatch(new RegExp(`\\b${name}\\b`));
+    }
   });
 
   test("guided-layer types are importable for consumer annotations", () => {
