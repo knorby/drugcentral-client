@@ -1,6 +1,6 @@
 {
   "name": "@knorby/drugcentral-client",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A fully-typed, zero-dependency TypeScript client for the DrugCentral API. Universal: Node, React Native, browsers, Bun, and Deno.",
   "license": "Apache-2.0",
   "keywords": [
@@ -50,7 +50,7 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=22"
+    "node": ">=18"
   },
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly && node scripts/fix-declaration-imports.mjs && node -e \"require('fs').copyFileSync('dist/index.d.ts','dist/index.d.cts')\"",
