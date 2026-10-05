@@ -24,7 +24,7 @@ describe("paginateAll", () => {
 
   test("treats an unhonored-limit dump as complete and never loops", async () => {
     let calls = 0;
-    const fetchPage = (skip: number, limit: number) => {
+    const fetchPage = (skip: number, _limit: number) => {
       calls += 1;
       expect(skip).toBe(0);
       // Upstream ignored the requested limit of 2 and sent the whole table.
