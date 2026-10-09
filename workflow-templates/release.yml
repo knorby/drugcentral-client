@@ -2,24 +2,23 @@ name: Release
 
 # Publishes to npm via OIDC trusted publishing — no NPM_TOKEN secret needed.
 #
-# STAGED WORKFLOW: this file lives in `workflow-templates/` and is INERT in
-# the template repo. GitHub only picks up workflows from
-# `.github/workflows/`. To activate it in a repo created from this template:
+# STAGED WORKFLOW: keep this inert until 0.1.0 has been published manually
+# from merged main and the repository is public. Activate in a follow-up PR:
 #
 #   git mv workflow-templates/release.yml .github/workflows/release.yml
 #
-# Prerequisites (one-time setup, see README "Releasing"):
-#   - A GitHub environment named `release` (repo Settings → Environments).
+# Prerequisites (see README "Releasing"):
+#   - A GitHub environment named `release`, restricted to the main branch.
 #   - A trusted publisher configured on npmjs.com for this package pointing
-#     at this repository, workflow path `.github/workflows/release.yml`, and
+#     at this repository, workflow filename `release.yml`, and
 #     environment `release` (all must match exactly).
-#   - npm >= 11.5.1 for OIDC. The publish job pins Node 24 (which ships a
-#     compatible npm) and upgrades to npm@latest anyway, because Node 22's
-#     bundled npm 10.x cannot perform OIDC token exchange.
+#   - Allow direct `npm publish` in the trusted-publisher configuration.
+#     Configure it within two days of its first successful OIDC publish.
+#   - npm >= 11.5.1 for OIDC. The publish job installs npm 11 explicitly.
 #
 # Runs on every push to main. The `select-mode` job inspects repo state and
 # picks what happens next:
-#   - changesets found          -> `version` job runs `changeset version`
+#   - non-empty changesets      -> `version` job runs `changeset version`
 #     (bumps package.json, updates CHANGELOG.md, deletes the consumed
 #     changesets) and opens or updates a "Version Packages" pull request.
 #     Merging that PR triggers this workflow again, landing in publish mode.
@@ -27,7 +26,10 @@ name: Release
 #     npm (no changesets left) -> `pack` job builds and packs the packages;
 #     `publish` job publishes via OIDC, pushes git tags, and creates a
 #     GitHub Release.
-#   - nothing to do             -> all downstream jobs are skipped (no-op).
+#   - only empty changesets, or nothing to publish -> no-op.
+# No changesets does NOT by itself mean no-op: an unpublished version is
+# publishable. Tests in a separate workflow do not gate this workflow, so
+# the pack job runs its own complete checks before handing off an artifact.
 #
 # Permissions follow the changesets trusted-publishing guidance: top-level
 # permissions are reset to none and each job receives only what it needs —
@@ -42,12 +44,14 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions: {}
 
 jobs:
   select-mode:
     name: Select Changesets mode
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -62,14 +66,15 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+          package-manager-cache: false
       - run: npm ci
       - name: Select Changesets mode
         id: select-mode
-        uses: changesets/action/select-mode@v2
+        uses: changesets/action/select-mode@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
 
   version:
     name: Version Packages PR
-    if: needs.select-mode.outputs.mode == 'version'
+    if: github.ref == 'refs/heads/main' && needs.select-mode.outputs.mode == 'version'
     needs: select-mode
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -83,15 +88,15 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
       - name: Create or update the Version Packages pull request
         id: version
-        uses: changesets/action/version@v2
+        uses: changesets/action/version@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
 
   pack:
     name: Build and pack packages
-    if: needs.select-mode.outputs.mode == 'publish'
+    if: github.ref == 'refs/heads/main' && needs.select-mode.outputs.mode == 'publish'
     needs: select-mode
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -106,17 +111,24 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run changeset:check
       - run: npm run build
+      - run: npm test
+      - run: npm audit --audit-level=moderate
+      - run: npm run pack:check
       - name: Pack packages for publishing
         id: pack
-        uses: changesets/action/pack@v2
+        uses: changesets/action/pack@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           publish-plan-artifact-id: ${{ needs.select-mode.outputs.publish-plan-artifact-id }}
 
   publish:
     name: Publish to npm
+    if: github.ref == 'refs/heads/main'
     needs: pack
     runs-on: ubuntu-latest
     environment: release
@@ -131,12 +143,12 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
-      # Node 24's bundled npm still may not satisfy npm >= 11.5.1 for OIDC.
+          package-manager-cache: false
+      # Keep the supported npm major stable rather than following npm@latest.
       - name: Upgrade npm for OIDC trusted publishing
-        run: npm install -g npm@latest
+        run: npm install -g npm@11 --ignore-scripts
       - run: npm ci
       - name: Publish packed packages
-        uses: changesets/action/publish@v2
+        uses: changesets/action/publish@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}

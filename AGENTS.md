@@ -95,12 +95,14 @@ scanning). Both are needed for full coverage.
 | `npm run format` | Format with Biome (writes changes) |
 | `npm run check` | Lint + format in one pass (writes changes) |
 | `npm run typecheck` | Type-check `src/` + `tests/` with `tsc` (uses `tsconfig.test.json`, no emit) |
+| `npm run changeset:check` | Parse every changeset without requiring Git base refs or a new release bump |
 | `npm test` | Run tests once (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage reporting |
 | `npm run test:live` | Opt-in live smoke tests against the real DrugCentral API (`DRUGCENTRAL_LIVE_TESTS=1`) |
 | `npm run drift:capture` | Capture upstream response shapes into `tests/shapes/` |
 | `npm run drift:check` | Fail if captured upstream shapes differ from the snapshots |
+| `npm run pack:check` | Validate dry-run package contents, version, and ESM/CJS entry points (build first) |
 | `npx changeset` | Create a changeset (required for any change that affects published output) |
 
 ---
@@ -114,9 +116,17 @@ scanning). Both are needed for full coverage.
   - `npm run lint` (Biome — lint + formatting; formatting is enforced in CI,
     so run `npm run check` before committing if hooks are skipped)
   - `npm run typecheck` (tsc, src + tests)
+  - `npm run changeset:check` (parse every changeset, including on version PRs)
   - `npm run build` (tsup)
   - `npm test` (Vitest)
   - `npm audit --audit-level=moderate` (vulnerability scan)
+  - `npm run pack:check` (package whitelist + required public entry points)
+- Tests and Pre-commit also support `workflow_dispatch`, so a maintainer can
+  check the latest commit on a bot-created version PR's branch. GitHub's default
+  workflow token does not automatically trigger checks on those PRs.
+- CI uses the parsing-only Changesets check. `changeset status` also enforces
+  release intent against a Git base ref, so it is an owner review command,
+  not a gate for version PRs after their changesets have been consumed.
 - The **pre-commit suite** (file hygiene + secret scanning) also runs in CI
   via `.github/workflows/pre-commit.yml` on every push to `main` and PRs
   against `main` (`pre-commit run --all-files --show-diff-on-failure` with
@@ -144,54 +154,42 @@ PRs and release them all at once.
   `.changeset/*.md` file alongside the code change.
 - **To release**: `npx changeset version` (bumps `package.json` +
   `CHANGELOG.md`), then `npm run release` (builds + publishes).
-- **GitHub Actions release** (`workflow-templates/release.yml`): ships
-  **staged** — this repo starts **private**, and provenance requires a public
-  repository, so the workflow stays out of `.github/workflows/` until the
-  repo goes public. At go-public time: `git mv
-  workflow-templates/release.yml .github/workflows/release.yml` and follow
-  the one-time setup below. Once active, it runs on every push to `main`
-  (and can be triggered manually via `workflow_dispatch`): with no pending
-  changesets it is a no-op; with changesets, it opens a "Version Packages" PR;
-  merging that PR publishes to npm, tags, and creates a GitHub Release.
-  Publishing uses OIDC trusted publishing — no npm token secrets are involved.
-- **Always verify before publishing**: `npm run build && npm pack --dry-run`
-  to confirm only `dist/`, `README.md`, `CHANGELOG.md`, and `LICENSE` are
-  included.
-
-### One-time release setup (repository owner)
-
-0. Activate the staged workflow when going public:
-   `git mv workflow-templates/release.yml .github/workflows/release.yml`.
-1. Repo **Settings → Actions → General → Workflow permissions**: select **Read
-   and write permissions**, and check **Allow GitHub Actions to create and
-   approve pull requests**.
-2. Repo **Settings → Environments**: create an environment named `release`.
-3. On npmjs.com, add a **trusted publisher** for the package. Values must
-   match the workflow exactly: this repository, workflow filename
-   `release.yml`, environment `release`.
-4. Enable npm 2FA: `npm profile enable-2fa auth-and-writes`.
-
-### First publish (manual)
-
-npm requires a package to exist before it can link a trusted publisher
-([npm/cli#8544](https://github.com/npm/cli/issues/8544)), so the very first
-publish is manual:
-
-```bash
-npm login
-npm pkg delete publishConfig.provenance   # provenance needs CI + public repo
-npm run release                           # build + changeset publish
-npm pkg set publishConfig.provenance=true
-git push origin main --follow-tags
-gh release create vX.Y.Z --notes-from-tag
-```
+- **Initial 0.1.0** is already versioned in `package.json`, the lockfile, and
+  `CHANGELOG.md`. Fold pre-publish refinements into that changelog entry; keep
+  the empty release-preparation changeset instead of scheduling another bump.
+- **GitHub Actions release** (`workflow-templates/release.yml`) is **staged**.
+  Activate it in a follow-up PR only after the repo is public and merged main's
+  0.1.0 has been published manually. The ordered owner runbook lives in
+  [README → Releasing](README.md#releasing); read it before changing release
+  setup, seeding npm, or activating the workflow.
+- **Once active**, non-empty changesets create a Version Packages PR. Only
+  empty changesets select no-op. With no changesets, an unpublished package
+  version selects publish; a version already on npm selects no-op. Publishing
+  runs its own lint/typecheck/build/test/audit/Changesets/content gates rather
+  than relying on another workflow. Only the publish job receives OIDC rights.
+- **Publishing boundaries:** workflow runs are restricted to `main`; the owner
+  must also restrict the GitHub `release` environment to `main`. Dependencies
+  are uncached in release jobs and third-party Changesets actions are SHA-pinned.
+- **Trusted publisher:** configure `knorby`, `drugcentral-client`, filename
+  `release.yml`, environment `release`, and allow direct `npm publish`. A new
+  configuration must complete its first publish within two days. Configure it
+  close to the next real release, not at a no-op workflow activation. Enable
+  Actions PR creation; keep default token permissions read-only.
+- **Initial local publish:** build and run the gates first, then use
+  `npm publish --access public --tag latest --provenance=false` from clean,
+  merged main. This overrides provenance for one invocation without modifying
+  `package.json`. Confirm npm publication before creating/pushing `v0.1.0` and
+  the GitHub Release. Local 0.1.0 has no CI provenance and cannot be overwritten.
+- **Package contents:** `npm run pack:check` enforces `dist/`, `README.md`,
+  `CHANGELOG.md`, `LICENSE`, and npm's automatically included `package.json`,
+  including both bundle and declaration entry points. Build before packing.
 
 ### Release failure quick reference
 
 | Symptom | Likely cause / fix |
 | --- | --- |
 | `EOTP` errors | A token is being used on a 2FA-enabled account — trusted publishing (no token) avoids this |
-| `ENEEDAUTH` / 401 on publish | npm < 11.5.1 (the workflow upgrades npm), or the trusted-publisher config on npmjs.com does not match exactly (repo, workflow filename, environment) |
+| `ENEEDAUTH` / 401 on publish | npm < 11.5.1, mismatched repo/workflow/environment, an expired trusted publisher, or missing direct-publish permission |
 | "not permitted to create pull requests" | Enable "Allow GitHub Actions to create and approve pull requests" in Actions settings |
 | Provenance warning `provider: null` | Published locally instead of via CI — provenance only works from CI on a public repo |
 | 404 "package not found" right after publishing | npm registry replication lag — retry in a minute |
@@ -206,13 +204,15 @@ gh release create vX.Y.Z --notes-from-tag
 - **Provenance** — `publishConfig.provenance: true` in `package.json` enables
   npm provenance attestation (cryptographic link to commit + workflow).
   Provenance requires publishing from CI on a **public** repository; the
-  manual first publish temporarily removes it (see "First publish").
+  manual first publish overrides it with `--provenance=false`; keep the
+  committed configuration unchanged. Future OIDC releases generate provenance.
 - **Scoped names** — `@knorby/…` scoped names prevent dependency confusion
   attacks. Scoped packages default to restricted visibility, so
   `publishConfig.access: "public"` is set.
 - **No secrets in published files** — the `files` field in `package.json`
-  whitelists only `dist`, `README.md`, `CHANGELOG.md`, and `LICENSE`. Never
-  add `src/`, `.env`, `tsconfig.json`, or other config to the `files` list.
+  whitelists `dist`, `README.md`, `CHANGELOG.md`, and `LICENSE` (npm also
+  includes `package.json`). Keep `src/`, `.env`, `tsconfig.json`, and other
+  configuration out of the `files` list.
 - **`.npmrc`** — `ignore-scripts=true` blocks dependency `postinstall`
   scripts by default (supply-chain security). This also blocks this repo's
   own `prepare` script, so `npm install` will not auto-set-up Husky hooks —
@@ -253,6 +253,10 @@ These rules are mandatory. Follow them strictly.
 - DrugCentral is the data source (CC BY-SA 4.0); this package is code only
   (Apache-2.0). Do not remove or weaken the README's attribution, license
   separation, or no-medical-advice disclaimer.
+- Sampled response fixtures in `tests/fixtures/` are DrugCentral data, not
+  Apache-2.0 code. Preserve their attribution README and per-response metadata;
+  keep fixtures out of npm output. The OpenAPI snapshot is separately identified
+  as an upstream API description.
 - The client never invents upstream facts: absent fields stay absent,
   `relationship_name` labels stay verbatim, FAERS numbers are signals (not
   incidence), and no version metadata is fabricated.
@@ -261,9 +265,11 @@ These rules are mandatory. Follow them strictly.
 
 - Run all quality gates:
   ```bash
-  npm run lint && npm run typecheck && npm test && npm run build
+  npm run lint && npm run typecheck && npm run build && npm test && npm audit --audit-level=moderate && npm run changeset:check && npm run pack:check
   ```
+- Build before tests: the public-surface tests read generated declarations.
 - Verify that `npm pack --dry-run` includes only `dist/`, `README.md`,
-  `CHANGELOG.md`, and `LICENSE` (no source, config, or secret files).
+  `CHANGELOG.md`, `LICENSE`, and the mandatory `package.json` (no fixtures,
+  source files, extra configuration, or secrets).
 - Verify that `AGENTS.md` and `README.md` still reflect the current state of
   the repository.

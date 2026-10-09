@@ -59,12 +59,14 @@
     "format": "biome format --write",
     "check": "biome check --write",
     "typecheck": "tsc -p tsconfig.test.json",
+    "changeset:check": "node --input-type=module -e \"import { readChangesets } from '@changesets/read'; await readChangesets(process.cwd());\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:live": "DRUGCENTRAL_LIVE_TESTS=1 vitest run tests/live.test.ts",
     "drift:check": "node scripts/capture-shapes.mjs --check",
     "drift:capture": "node scripts/capture-shapes.mjs",
+    "pack:check": "node scripts/check-package.mjs",
     "release": "npm run build && changeset publish",
     "prepare": "husky"
   },
@@ -79,6 +81,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@changesets/cli": "^3.0.3",
+    "@changesets/read": "^1.0.1",
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.2",
     "@types/node": "^26.6.3",

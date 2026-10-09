@@ -62,7 +62,7 @@ export interface Struct2Atc {
 export interface Struct2Obprod {
   /** DrugCentral structure id. */
   struct_id: number;
-  /** Product row id (see {@link Product}). */
+  /** Orange Book product id; a separate id space from `Product.id`. */
   prod_id: number;
   /** Strength expression (e.g. `"EQ 200MG BASE/VIAL"`), when supplied. */
   strength: string | null;

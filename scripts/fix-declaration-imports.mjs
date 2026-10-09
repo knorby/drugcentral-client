@@ -15,7 +15,8 @@ import { join } from "node:path";
 
 // Matches `from "./path"`, `from '../path'`, and `import("./path")` where the
 // specifier is relative and has no extension (`.js`/`.cjs`/`.mjs` left alone).
-const SPECIFIER = /(\bfrom\s*(["'])(\.\.?\/[^"'.]+)\2|\bimport\(\s*(["'])(\.\.?\/[^"'.]+)\4)/g;
+const SPECIFIER =
+  /(\bfrom\s*(["'])(\.\.?\/[^"'.]+)\2|\bimport\(\s*(["'])(\.\.?\/[^"'.]+)\4)/g;
 
 async function* walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -41,4 +42,6 @@ for await (const file of walk("dist")) {
     files += 1;
   }
 }
-console.log(`fix-declaration-imports: rewrote ${specifiers} specifier(s) in ${files} file(s)`);
+console.log(
+  `fix-declaration-imports: rewrote ${specifiers} specifier(s) in ${files} file(s)`,
+);

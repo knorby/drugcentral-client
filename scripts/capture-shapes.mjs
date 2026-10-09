@@ -22,15 +22,17 @@
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { shapeOf } from "./shape.mjs";
 import { SAMPLES } from "./capture-live.mjs";
+import { shapeOf } from "./shape.mjs";
 
 const BASE =
   process.env.DRUGCENTRAL_BASE_URL ??
   "https://uxn2ycvimg.us-east-2.awsapprunner.com";
 const SHAPES_DIR = resolve(import.meta.dirname, "../tests/shapes");
 const CHECK_ONLY = process.argv.includes("--check");
-const PROBE_SPACING_MS = Number(process.env.DRUGCENTRAL_PROBE_SPACING_MS ?? 300);
+const PROBE_SPACING_MS = Number(
+  process.env.DRUGCENTRAL_PROBE_SPACING_MS ?? 300,
+);
 const RECORDS_PER_ENDPOINT = 3;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

@@ -11,7 +11,7 @@
  * recorded in a sibling `.meta.json`.
  */
 import { createHash } from "node:crypto";
-import { mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -43,7 +43,11 @@ export const SAMPLES = [
     params: { limit: 2 },
     note: "Evidence for the unhonored-limit quirk: upstream ignores the requested limit.",
   },
-  { file: "omop-relationship", path: "/omop_relationship", params: { limit: 5 } },
+  {
+    file: "omop-relationship",
+    path: "/omop_relationship",
+    params: { limit: 5 },
+  },
   {
     file: "omop-off-label",
     path: "/omop_relationship/relationship_name/off-label use",
@@ -55,7 +59,11 @@ export const SAMPLES = [
     params: { limit: 5 },
   },
   { file: "faers", path: "/faers/struct_id/2391", params: { limit: 20 } },
-  { file: "faers-female", path: "/faers_female/struct_id/2391", params: { limit: 5 } },
+  {
+    file: "faers-female",
+    path: "/faers_female/struct_id/2391",
+    params: { limit: 5 },
+  },
   { file: "product", path: "/product", params: { limit: 5 } },
   { file: "product-ndc", path: "/product/ndc_product_code/55111-695" },
   { file: "atc", path: "/atc", params: { limit: 5 } },
@@ -67,7 +75,11 @@ export const SAMPLES = [
     path: "/act_table_full/struct_id/102",
     params: { limit: 5 },
   },
-  { file: "target-dictionary", path: "/target_dictionary", params: { limit: 5 } },
+  {
+    file: "target-dictionary",
+    path: "/target_dictionary",
+    params: { limit: 5 },
+  },
   { file: "target-component", path: "/target_component", params: { limit: 5 } },
   { file: "target-go", path: "/target_go", params: { limit: 5 } },
   { file: "target-keyword", path: "/target_keyword", params: { limit: 5 } },
@@ -143,7 +155,9 @@ async function main() {
         fetchedAt: new Date().toISOString(),
         rowsReceived: rows.length,
         rowsStored: stored.length,
-        ...(notes.length > 0 ? { derived: truncated, note: notes.join(" ") } : {}),
+        ...(notes.length > 0
+          ? { derived: truncated, note: notes.join(" ") }
+          : {}),
         sha256: createHash("sha256").update(raw).digest("hex"),
       });
       console.log(

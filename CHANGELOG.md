@@ -10,5 +10,7 @@
   - Guided domain layer with provenance envelopes: searchStructuresByName (ambiguity preserved), resolveIdentifier/resolveByRxcui/resolveByUnii (validated vocabularies; NDC resolution documented-unsupported), getStructureProfile, getConditionRelationships/getIndications/getOffLabelUses/getContraindications (exact-label filtering; upstream substring trap avoided), getFaersSignals (population-stamped signals, never incidence), getTargetActivity (drug-target, not DDI).
   - Typed error taxonomy incl. DrugCentralNotFoundError for the no-match-as-404 behavior and DrugCentralInvalidResponseError for transient non-JSON bodies; opt-in bounded 5xx retry; injectable fetch; consumer-abort passthrough.
   - Live fixture capture + OpenAPI snapshot, shape-snapshot drift tooling (drift:check/drift:capture), deterministic offline tests, and opt-in live smoke tests (test:live).
+  - Consumer-feedback refinements: named root exports for all record types, removal of the permanently empty `StructureProfile.drugClasses` field, and client-side `limit` options with labeled truncation on relationship getters.
+  - Documented and tested guided no-match 404 normalization, prominent API-host stability guidance, and release gates for version metadata and package contents.
 
 <!-- Changesets generates entries below this line. Do not edit manually. -->

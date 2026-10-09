@@ -1,2 +1,0 @@
-
-Post-review adjustments from consumer feedback: every record type is a named root export (no star-export-only types); StructureProfile drops the permanently-empty drugClasses field (pre-release removal); relationship getters accept limit with labeled truncation; the no-match 404→empty guided contract is stated in the README and pinned by a dedicated contract test; host-stability caveat promoted to a top-of-README callout.
