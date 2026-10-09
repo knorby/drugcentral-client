@@ -7,7 +7,7 @@ name: Release
 #
 #   git mv workflow-templates/release.yml .github/workflows/release.yml
 #
-# Prerequisites (see README "Releasing"):
+# Prerequisites:
 #   - A GitHub environment named `release`, restricted to the main branch.
 #   - A trusted publisher configured on npmjs.com for this package pointing
 #     at this repository, workflow filename `release.yml`, and

@@ -143,81 +143,11 @@ scanning). Both are needed for full coverage.
 
 ---
 
-## Versioning and publishing
+## Changesets
 
-This repo uses [Changesets](https://github.com/changesets/changesets) for
-versioning. Versioning is **decoupled from merges** — you can merge multiple
-PRs and release them all at once.
-
-- **Before a PR that changes published output**: run `npx changeset`, select
-  bump type (patch/minor/major), write a summary. Commit the generated
-  `.changeset/*.md` file alongside the code change.
-- **To release**: `npx changeset version` (bumps `package.json` +
-  `CHANGELOG.md`), then `npm run release` (builds + publishes).
-- **Initial 0.1.0** is already versioned in `package.json`, the lockfile, and
-  `CHANGELOG.md`. Fold pre-publish refinements into that changelog entry; keep
-  the empty release-preparation changeset instead of scheduling another bump.
-- **GitHub Actions release** (`workflow-templates/release.yml`) is **staged**.
-  Activate it in a follow-up PR only after the repo is public and merged main's
-  0.1.0 has been published manually. The ordered owner runbook lives in
-  [README → Releasing](README.md#releasing); read it before changing release
-  setup, seeding npm, or activating the workflow.
-- **Once active**, non-empty changesets create a Version Packages PR. Only
-  empty changesets select no-op. With no changesets, an unpublished package
-  version selects publish; a version already on npm selects no-op. Publishing
-  runs its own lint/typecheck/build/test/audit/Changesets/content gates rather
-  than relying on another workflow. Only the publish job receives OIDC rights.
-- **Publishing boundaries:** workflow runs are restricted to `main`; the owner
-  must also restrict the GitHub `release` environment to `main`. Dependencies
-  are uncached in release jobs and third-party Changesets actions are SHA-pinned.
-- **Trusted publisher:** configure `knorby`, `drugcentral-client`, filename
-  `release.yml`, environment `release`, and allow direct `npm publish`. A new
-  configuration must complete its first publish within two days. Configure it
-  close to the next real release, not at a no-op workflow activation. Enable
-  Actions PR creation; keep default token permissions read-only.
-- **Initial local publish:** build and run the gates first, then use
-  `npm publish --access public --tag latest --provenance=false` from clean,
-  merged main. This overrides provenance for one invocation without modifying
-  `package.json`. Confirm npm publication before creating/pushing `v0.1.0` and
-  the GitHub Release. Local 0.1.0 has no CI provenance and cannot be overwritten.
-- **Package contents:** `npm run pack:check` enforces `dist/`, `README.md`,
-  `CHANGELOG.md`, `LICENSE`, and npm's automatically included `package.json`,
-  including both bundle and declaration entry points. Build before packing.
-
-### Release failure quick reference
-
-| Symptom | Likely cause / fix |
-| --- | --- |
-| `EOTP` errors | A token is being used on a 2FA-enabled account — trusted publishing (no token) avoids this |
-| `ENEEDAUTH` / 401 on publish | npm < 11.5.1, mismatched repo/workflow/environment, an expired trusted publisher, or missing direct-publish permission |
-| "not permitted to create pull requests" | Enable "Allow GitHub Actions to create and approve pull requests" in Actions settings |
-| Provenance warning `provider: null` | Published locally instead of via CI — provenance only works from CI on a public repo |
-| 404 "package not found" right after publishing | npm registry replication lag — retry in a minute |
-
-### Publishing security
-
-- **Trusted publishing (OIDC)** — the release workflow publishes with an OIDC
-  token minted by GitHub Actions; there are no npm tokens involved (no
-  `NPM_TOKEN` or `NODE_AUTH_TOKEN` secrets). The npm-side trusted-publisher
-  config must match the workflow exactly. This is compatible with 2FA
-  (`npm profile enable-2fa auth-and-writes`) because no token needs an OTP.
-- **Provenance** — `publishConfig.provenance: true` in `package.json` enables
-  npm provenance attestation (cryptographic link to commit + workflow).
-  Provenance requires publishing from CI on a **public** repository; the
-  manual first publish overrides it with `--provenance=false`; keep the
-  committed configuration unchanged. Future OIDC releases generate provenance.
-- **Scoped names** — `@knorby/…` scoped names prevent dependency confusion
-  attacks. Scoped packages default to restricted visibility, so
-  `publishConfig.access: "public"` is set.
-- **No secrets in published files** — the `files` field in `package.json`
-  whitelists `dist`, `README.md`, `CHANGELOG.md`, and `LICENSE` (npm also
-  includes `package.json`). Keep `src/`, `.env`, `tsconfig.json`, and other
-  configuration out of the `files` list.
-- **`.npmrc`** — `ignore-scripts=true` blocks dependency `postinstall`
-  scripts by default (supply-chain security). This also blocks this repo's
-  own `prepare` script, so `npm install` will not auto-set-up Husky hooks —
-  run `npx husky` after `npm install`, or use
-  `npm install --ignore-scripts=false` to allow the prepare script.
+Record changes that affect published output in `.changeset/*.md` alongside
+the code change. This repo uses [Changesets](https://github.com/changesets/changesets)
+for versioning and changelogs.
 
 ---
 
