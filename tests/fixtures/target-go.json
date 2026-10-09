@@ -1,0 +1,27 @@
+[
+  {
+    "type": "C",
+    "id": "GO:0044173",
+    "term": "host cell endoplasmic reticulum-Golgi intermediate compartment membrane"
+  },
+  {
+    "type": "F",
+    "id": "GO:0062185",
+    "term": "secalciferol 1-monooxygenase activity"
+  },
+  {
+    "type": "F",
+    "id": "GO:0062181",
+    "term": "1-alpha,25-dihydroxyvitamin D3 23-hydroxylase activity"
+  },
+  {
+    "type": "F",
+    "id": "GO:0062180",
+    "term": "25-hydroxycholecalciferol-23-hydroxylase activity"
+  },
+  {
+    "type": "C",
+    "id": "GO:0038143",
+    "term": "ERBB3:ERBB2 complex"
+  }
+]

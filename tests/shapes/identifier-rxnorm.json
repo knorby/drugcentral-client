@@ -1,0 +1,9 @@
+[
+  {
+    "id": "number",
+    "id_type": "string",
+    "identifier": "string",
+    "parent_match": "mixed",
+    "struct_id": "number"
+  }
+]

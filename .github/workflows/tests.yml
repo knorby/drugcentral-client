@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Bot-created version PRs need a manual check run unless an App token is used.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,6 +29,9 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      # Parse every changeset without requiring a base ref or a new bump on version PRs.
+      - run: npm run changeset:check
       - run: npm run build
       - run: npm test
       - run: npm audit --audit-level=moderate
+      - run: npm run pack:check

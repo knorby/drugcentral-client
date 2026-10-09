@@ -1,0 +1,12 @@
+[
+  {
+    "accession": "string",
+    "gene": "string",
+    "geneid": "mixed",
+    "id": "number",
+    "name": "string",
+    "organism": "string",
+    "swissprot": "string",
+    "tdl": "mixed"
+  }
+]

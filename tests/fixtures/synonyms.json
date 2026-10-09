@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1407,
+    "name": "ibuprofen lysine",
+    "preferred_name": null,
+    "lname": "ibuprofen lysine",
+    "syn_id": 19586,
+    "parent_id": null
+  },
+  {
+    "id": 1407,
+    "name": "ibuprofen lysinate",
+    "preferred_name": null,
+    "lname": "ibuprofen lysinate",
+    "syn_id": 19587,
+    "parent_id": null
+  },
+  {
+    "id": 1407,
+    "name": "ibuprofen lysine salt",
+    "preferred_name": null,
+    "lname": "ibuprofen lysine salt",
+    "syn_id": 19588,
+    "parent_id": null
+  },
+  {
+    "id": 3851,
+    "name": "dexibuprofen",
+    "preferred_name": 1,
+    "lname": "dexibuprofen",
+    "syn_id": 2161,
+    "parent_id": null
+  },
+  {
+    "id": 1407,
+    "name": "ibuprofen",
+    "preferred_name": 1,
+    "lname": "ibuprofen",
+    "syn_id": 2162,
+    "parent_id": 9
+  },
+  {
+    "id": 1409,
+    "name": "ibuprofen piconol",
+    "preferred_name": 1,
+    "lname": "ibuprofen piconol",
+    "syn_id": 3124,
+    "parent_id": null
+  },
+  {
+    "id": 1410,
+    "name": "ibuprofen guaiacol ester",
+    "preferred_name": 1,
+    "lname": "ibuprofen guaiacol ester",
+    "syn_id": 10098,
+    "parent_id": null
+  },
+  {
+    "id": 1407,
+    "name": "ibuprofen sodium",
+    "preferred_name": null,
+    "lname": "ibuprofen sodium",
+    "syn_id": 16783,
+    "parent_id": null
+  },
+  {
+    "id": 3986,
+    "name": "ibuprofen aminoethanol",
+    "preferred_name": null,
+    "lname": "ibuprofen aminoethanol",
+    "syn_id": 18482,
+    "parent_id": null
+  }
+]

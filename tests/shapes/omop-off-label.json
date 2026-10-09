@@ -1,0 +1,13 @@
+[
+  {
+    "concept_id": "number",
+    "concept_name": "string",
+    "cui_semantic_type": "mixed",
+    "id": "number",
+    "relationship_name": "string",
+    "snomed_conceptid": "mixed",
+    "snomed_full_name": "mixed",
+    "struct_id": "number",
+    "umls_cui": "mixed"
+  }
+]

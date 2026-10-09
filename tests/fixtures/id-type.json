@@ -1,0 +1,62 @@
+[
+  {
+    "id": 33,
+    "type": "VANDF",
+    "description": "Veterans Health Administration National Drug File",
+    "url": null
+  },
+  {
+    "id": 34,
+    "type": "NDFRT",
+    "description": "National Drug File",
+    "url": null
+  },
+  {
+    "id": 35,
+    "type": "NDDF",
+    "description": "FDB MedKnowledge (formerly NDDF Plus)",
+    "url": null
+  },
+  {
+    "id": 36,
+    "type": "RXNORM",
+    "description": "RxNorm Vocabulary",
+    "url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm="
+  },
+  {
+    "id": 37,
+    "type": "MMSL",
+    "description": "Multum MediSource Lexicon",
+    "url": null
+  },
+  {
+    "id": 38,
+    "type": "SNOMEDCT_US",
+    "description": "US Edition of SNOMED CT",
+    "url": "http://browser.ihtsdotools.org/?perspective=full&edition=us-edition&release=v20160901&server=https://browser-aws-1.ihtsdotools.org/api/snomed&langRefset=900000000000509007&conceptId1="
+  },
+  {
+    "id": 25,
+    "type": "DRUGBANK_ID",
+    "description": "DrugBank ID",
+    "url": "http://www.drugbank.ca/drugs/"
+  },
+  {
+    "id": 26,
+    "type": "MESH_DESCRIPTOR_UI",
+    "description": "Medical Subject Headings (MeSH) Descriptor Unique ID",
+    "url": "http://www.ncbi.nlm.nih.gov/mesh/?term="
+  },
+  {
+    "id": 27,
+    "type": "MESH_SUPPLEMENTAL_RECORD_UI",
+    "description": "Medical Subject Headings (MeSH) Supplemental Record Unique ID",
+    "url": "http://www.ncbi.nlm.nih.gov/mesh/?term="
+  },
+  {
+    "id": 28,
+    "type": "SECONDARY_CAS_RN",
+    "description": "Secondary assigned CAS Registry Number",
+    "url": "http://chem.sis.nlm.nih.gov/chemidplus/rn/"
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "drug_ae": "number",
+    "drug_no_ae": "number",
+    "id": "number",
+    "level": "string",
+    "llr": "number",
+    "llr_threshold": "number",
+    "meddra_code": "number",
+    "meddra_name": "string",
+    "no_drug_ae": "number",
+    "no_drug_no_ae": "number",
+    "struct_id": "number"
+  }
+]

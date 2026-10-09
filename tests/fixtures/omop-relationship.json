@@ -1,0 +1,57 @@
+[
+  {
+    "relationship_name": "indication",
+    "id": 174026,
+    "concept_name": "Triple negative breast neoplasms",
+    "snomed_full_name": "Triple negative breast neoplasms",
+    "snomed_conceptid": 706970001,
+    "struct_id": 5391,
+    "concept_id": 40249429,
+    "umls_cui": "C3539878",
+    "cui_semantic_type": "T191"
+  },
+  {
+    "relationship_name": "indication",
+    "id": 174027,
+    "concept_name": "Metastatic non-small cell lung cancer",
+    "snomed_full_name": "Metastatic non-small cell lung cancer",
+    "snomed_conceptid": null,
+    "struct_id": 5392,
+    "concept_id": 40249397,
+    "umls_cui": "C0278987",
+    "cui_semantic_type": "T191"
+  },
+  {
+    "relationship_name": "indication",
+    "id": 174028,
+    "concept_name": "Metastatic non-small cell lung cancer",
+    "snomed_full_name": "Metastatic non-small cell lung cancer",
+    "snomed_conceptid": null,
+    "struct_id": 5393,
+    "concept_id": 40249397,
+    "umls_cui": "C0278987",
+    "cui_semantic_type": "T191"
+  },
+  {
+    "relationship_name": "indication",
+    "id": 174029,
+    "concept_name": "Medullary thyroid carcinoma",
+    "snomed_full_name": "Medullary thyroid carcinoma",
+    "snomed_conceptid": 255032005,
+    "struct_id": 5393,
+    "concept_id": 40248953,
+    "umls_cui": "C0238462",
+    "cui_semantic_type": "T191"
+  },
+  {
+    "relationship_name": "indication",
+    "id": 174030,
+    "concept_name": "Gastrointestinal stromal tumor",
+    "snomed_full_name": "Gastrointestinal stromal tumor",
+    "snomed_conceptid": 420120006,
+    "struct_id": 5394,
+    "concept_id": 21004733,
+    "umls_cui": "C0238198",
+    "cui_semantic_type": "T191"
+  }
+]

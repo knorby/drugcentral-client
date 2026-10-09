@@ -1,0 +1,8 @@
+[
+  {
+    "id": "number",
+    "is_group": "number",
+    "name": "string",
+    "source": "string"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "number",
+    "lname": "string",
+    "name": "string",
+    "parent_id": "mixed",
+    "preferred_name": "mixed",
+    "syn_id": "number"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "number",
+    "name": "string",
+    "protein_components": "number",
+    "protein_type": "string",
+    "target_class": "string",
+    "tdl": "mixed"
+  }
+]

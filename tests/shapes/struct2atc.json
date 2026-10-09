@@ -1,0 +1,7 @@
+[
+  {
+    "atc_code": "string",
+    "id": "number",
+    "struct_id": "number"
+  }
+]
