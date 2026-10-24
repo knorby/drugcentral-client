@@ -103,6 +103,38 @@ describe("guide.searchStructuresByName", () => {
       synonymName: "ibuprofen lysine",
     });
   });
+
+  test("a later preferred synonym upgrades an earlier non-preferred match", async () => {
+    const { client } = clientWithRoutes({
+      "structures/name/ibuprofen lysine": [],
+      "synonyms/name/ibuprofen lysine": [
+        {
+          id: 1407,
+          name: "ibuprofen lysine",
+          lname: "ibuprofen lysine",
+          preferred_name: null,
+          syn_id: 19586,
+          parent_id: null,
+        },
+        {
+          id: 1407,
+          name: "ibuprofen",
+          lname: "ibuprofen",
+          preferred_name: 1,
+          syn_id: 2162,
+          parent_id: null,
+        },
+      ],
+    });
+    const { data } =
+      await client.guide.searchStructuresByName("ibuprofen lysine");
+    expect(data).toHaveLength(1);
+    expect(data[0]).toMatchObject({
+      structId: 1407,
+      name: "ibuprofen",
+      matchReason: "preferred-name",
+    });
+  });
 });
 
 describe("guide.resolveIdentifier", () => {

@@ -49,6 +49,19 @@ describe("target activity resource (act_table_full)", () => {
     ]);
   });
 
+  test("getAll pages via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    for await (const _row of createTargetActivityResource(requester).getAll(
+      undefined,
+      { pageSize: 2, maxPages: 1 },
+    )) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "act_table_full", params: { skip: 0, limit: 2 } },
+    ]);
+  });
+
   test("exportText hits the csv/tsv sibling", async () => {
     const { requester, calls } = mockRequester();
     await createTargetActivityResource(requester).exportText("tsv");
@@ -126,5 +139,35 @@ describe("targets resource cluster", () => {
       "tdkey2tc/tdkey_id/1",
       "tdkey2tc/component_id/2651",
     ]);
+  });
+
+  test("list and getAll page for every target table", async () => {
+    const { requester, calls } = mockRequester();
+    const targets = createTargetsResource(requester);
+    const tables = [
+      { path: "target_dictionary", resource: targets.dictionary },
+      { path: "target_component", resource: targets.component },
+      { path: "target_go", resource: targets.go },
+      { path: "target_keyword", resource: targets.keyword },
+      { path: "target_class", resource: targets.classes },
+      { path: "td2tc", resource: targets.td2tc },
+      { path: "tdgo2tc", resource: targets.tdgo2tc },
+      { path: "tdkey2tc", resource: targets.tdkey2tc },
+    ];
+    for (const { resource } of tables) {
+      await resource.list();
+      for await (const _row of resource.getAll(undefined, {
+        pageSize: 2,
+        maxPages: 1,
+      })) {
+        // drain
+      }
+    }
+    expect(calls).toEqual(
+      tables.flatMap(({ path }) => [
+        { path, params: undefined },
+        { path, params: { skip: 0, limit: 2 } },
+      ]),
+    );
   });
 });

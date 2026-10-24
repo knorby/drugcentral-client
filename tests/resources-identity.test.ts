@@ -98,6 +98,22 @@ describe("synonyms resource", () => {
     ]);
   });
 
+  test("list and getAll page via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    const r = createSynonymsResource(requester);
+    await r.list();
+    for await (const _row of r.getAll(undefined, {
+      pageSize: 1,
+      maxPages: 1,
+    })) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "synonyms", params: undefined },
+      { path: "synonyms", params: { skip: 0, limit: 1 } },
+    ]);
+  });
+
   test("exportText hits the csv/tsv sibling", async () => {
     const { requester, calls } = mockRequester();
     await createSynonymsResource(requester).exportText("tsv");
@@ -121,6 +137,22 @@ describe("identifiers resource", () => {
     ]);
   });
 
+  test("list and getAll page via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    const r = createIdentifiersResource(requester);
+    await r.list({ skip: 5, limit: 10 });
+    for await (const _row of r.getAll(undefined, {
+      pageSize: 2,
+      maxPages: 1,
+    })) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "identifier", params: { skip: 5, limit: 10 } },
+      { path: "identifier", params: { skip: 0, limit: 2 } },
+    ]);
+  });
+
   test("has no exportText (no csv/tsv upstream)", () => {
     const { requester } = mockRequester();
     expect("exportText" in createIdentifiersResource(requester)).toBe(false);
@@ -139,5 +171,14 @@ describe("id types resource", () => {
       "id_type/type/RXNORM",
       "id_type",
     ]);
+  });
+
+  test("getAll walks the unfiltered table", async () => {
+    const { requester, calls } = mockRequester();
+    const r = createIdTypesResource(requester);
+    for await (const _row of r.getAll({ pageSize: 2, maxPages: 1 })) {
+      // drain
+    }
+    expect(calls).toEqual([{ path: "id_type", params: undefined }]);
   });
 });
