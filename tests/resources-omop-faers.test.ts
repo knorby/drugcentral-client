@@ -54,6 +54,22 @@ describe("omop relationships resource", () => {
       "omop_relationship/relationship_name/off-label%20use",
     );
   });
+
+  test("list and getAll page via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    const r = createOmopRelationshipsResource(requester);
+    await r.list();
+    for await (const _row of r.getAll(undefined, {
+      pageSize: 2,
+      maxPages: 1,
+    })) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "omop_relationship", params: undefined },
+      { path: "omop_relationship", params: { skip: 0, limit: 2 } },
+    ]);
+  });
 });
 
 describe("faers resource", () => {
@@ -101,6 +117,19 @@ describe("faers resource", () => {
     await r.exportText("csv");
     await r.exportText("tsv", { population: "female" });
     expect(calls.map((c) => c.path)).toEqual(["faers/csv", "faers_female/tsv"]);
+  });
+
+  test("list and getAll default to the unstratified table", async () => {
+    const { requester, calls } = mockRequester();
+    const r = createFaersResource(requester);
+    await r.list();
+    for await (const _row of r.getAll(undefined, { maxPages: 1 })) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "faers", params: {} },
+      { path: "faers", params: { skip: 0, limit: 100 } },
+    ]);
   });
 
   test("rejects an unknown population eagerly", () => {

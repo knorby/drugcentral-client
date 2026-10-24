@@ -1,5 +1,12 @@
 # @knorby/drugcentral-client
 
+[![Tests](https://github.com/knorby/drugcentral-client/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/knorby/drugcentral-client/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/knorby/drugcentral-client/branch/main/graph/badge.svg)](https://codecov.io/gh/knorby/drugcentral-client)
+[![npm version](https://img.shields.io/npm/v/@knorby/drugcentral-client)](https://www.npmjs.com/package/@knorby/drugcentral-client)
+[![GitHub repo](https://img.shields.io/badge/repo-knorby%2Fdrugcentral--client-blue)](https://github.com/knorby/drugcentral-client)
+[![License](https://img.shields.io/github/license/knorby/drugcentral-client)](https://github.com/knorby/drugcentral-client/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-typed-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
 A fully-typed, zero-dependency TypeScript client for the [DrugCentral](https://drugcentral.org) API — universal: Node, React Native, browsers, Bun, and Deno.
 
 Covers every DrugCentral DRS resource group (structures, synonyms, identifier crosswalks, products, ATC, drug classes, OMOP drug–condition relationships, FAERS signals, drug–target activity, and the target metadata cluster) **plus** a guided domain layer that searches, resolves, and assembles provenance-enveloped knowledge without losing the source's semantics.
@@ -158,7 +165,7 @@ Zero runtime dependencies and no Node-only APIs — Metro-safe out of the box. O
 ## Development
 
 ```bash
-npm run lint && npm run typecheck && npm run build && npm test  # build before declaration tests
+npm run lint && npm run typecheck && npm run build && npm run test:coverage  # build before declaration tests
 npm audit --audit-level=moderate
 npm run changeset:check  # parse all changesets; no Git base ref needed
 npm run pack:check      # dry-run packing; validates contents and ESM/CJS entry points
@@ -166,5 +173,7 @@ npm run test:live       # opt-in live smoke tests (DRUGCENTRAL_LIVE_TESTS=1, nee
 npm run drift:capture   # re-capture upstream response shapes into tests/shapes/
 npm run drift:check     # fail when upstream shapes drift from committed snapshots
 ```
+
+CI runs the suite with V8 coverage and uploads `coverage/lcov.info` to Codecov. The coverage thresholds require 100% statements, branches, functions, and lines (build-time-only branches are explicitly ignored).
 
 Types are hand-written from sampled live payloads (`tests/fixtures/`, with `openapi.json` snapshotted for reference) because the upstream OpenAPI declares no response schemas. See [AGENTS.md](AGENTS.md) for conventions and the [license notes](#data-license-vs-code-license--read-this-before-redistributing) before redistributing data.

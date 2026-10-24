@@ -9,6 +9,7 @@ export const DEFAULT_PAGE_SIZE = 100;
 
 /** Default `User-Agent` sent where the runtime allows setting it. */
 export const DEFAULT_USER_AGENT = `@knorby/drugcentral-client/${
+  /* v8 ignore next -- PKG_VERSION is replaced at build time; the fallback covers unbundled source */
   typeof PKG_VERSION !== "undefined" ? PKG_VERSION : "0.0.0"
 }`;
 

@@ -32,6 +32,12 @@ jobs:
       # Parse every changeset without requiring a base ref or a new bump on version PRs.
       - run: npm run changeset:check
       - run: npm run build
-      - run: npm test
+      - run: npm run test:coverage
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true
       - run: npm audit --audit-level=moderate
       - run: npm run pack:check

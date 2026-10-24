@@ -45,6 +45,17 @@ describe("products resource", () => {
     expect(calls[4]?.params).toEqual({ limit: 5 });
   });
 
+  test("getAll pages via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    for await (const _row of createProductsResource(requester).getAll(
+      undefined,
+      { pageSize: 2, maxPages: 1 },
+    )) {
+      // drain
+    }
+    expect(calls).toEqual([{ path: "product", params: { skip: 0, limit: 2 } }]);
+  });
+
   test("exportText hits the csv/tsv sibling", async () => {
     const { requester, calls } = mockRequester();
     await createProductsResource(requester).exportText("csv");
@@ -63,6 +74,22 @@ describe("atc resource", () => {
       "atc/id/1",
       "atc/code/A01AA01",
       "atc/chemical_substance/sodium%20fluoride",
+    ]);
+  });
+
+  test("list and getAll page via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    const r = createAtcResource(requester);
+    await r.list({ limit: 5 });
+    for await (const _row of r.getAll(undefined, {
+      pageSize: 1,
+      maxPages: 1,
+    })) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "atc", params: { limit: 5 } },
+      { path: "atc", params: { skip: 0, limit: 1 } },
     ]);
   });
 
@@ -85,6 +112,22 @@ describe("drug classes resource", () => {
       "drug_class/source/LEXICOMP",
     ]);
   });
+
+  test("list and getAll page via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    const r = createDrugClassesResource(requester);
+    await r.list();
+    for await (const _row of r.getAll(undefined, {
+      pageSize: 3,
+      maxPages: 1,
+    })) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "drug_class", params: undefined },
+      { path: "drug_class", params: { skip: 0, limit: 3 } },
+    ]);
+  });
 });
 
 describe("struct2atc and struct2obprod resources", () => {
@@ -101,6 +144,19 @@ describe("struct2atc and struct2obprod resources", () => {
     ]);
   });
 
+  test("struct2atc getAll pages via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    for await (const _row of createStruct2AtcResource(requester).getAll(
+      undefined,
+      { pageSize: 1, maxPages: 1 },
+    )) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "struct2atc", params: { skip: 0, limit: 1 } },
+    ]);
+  });
+
   test("struct2obprod filter methods map to upstream paths", async () => {
     const { requester, calls } = mockRequester();
     const r = createStruct2ObprodResource(requester);
@@ -109,6 +165,22 @@ describe("struct2atc and struct2obprod resources", () => {
     expect(calls.map((c) => c.path)).toEqual([
       "struct2obprod/struct_id/102",
       "struct2obprod/prod_id/683206",
+    ]);
+  });
+
+  test("struct2obprod list and getAll page via skip/limit", async () => {
+    const { requester, calls } = mockRequester();
+    const r = createStruct2ObprodResource(requester);
+    await r.list({ skip: 5, limit: 10 });
+    for await (const _row of r.getAll(undefined, {
+      pageSize: 2,
+      maxPages: 1,
+    })) {
+      // drain
+    }
+    expect(calls).toEqual([
+      { path: "struct2obprod", params: { skip: 5, limit: 10 } },
+      { path: "struct2obprod", params: { skip: 0, limit: 2 } },
     ]);
   });
 });

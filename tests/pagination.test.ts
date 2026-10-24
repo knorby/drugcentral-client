@@ -80,4 +80,13 @@ describe("paginateAll", () => {
       ](),
     ).toThrow(RangeError);
   });
+
+  test("rejects invalid maxPages eagerly", () => {
+    expect(() =>
+      paginateAll(() => Promise.resolve([]), { maxPages: 0 }),
+    ).toThrow(RangeError);
+    expect(() =>
+      paginateAll(() => Promise.resolve([]), { maxPages: 1.5 }),
+    ).toThrow(RangeError);
+  });
 });

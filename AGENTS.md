@@ -118,7 +118,9 @@ scanning). Both are needed for full coverage.
   - `npm run typecheck` (tsc, src + tests)
   - `npm run changeset:check` (parse every changeset, including on version PRs)
   - `npm run build` (tsup)
-  - `npm test` (Vitest)
+  - `npm run test:coverage` (Vitest + V8; 100% statement/branch/function/line
+    thresholds, with build-time-only branches explicitly ignored)
+  - Codecov upload (`codecov/codecov-action`, `coverage/lcov.info`)
   - `npm audit --audit-level=moderate` (vulnerability scan)
   - `npm run pack:check` (package whitelist + required public entry points)
 - Tests and Pre-commit also support `workflow_dispatch`, so a maintainer can
@@ -195,7 +197,7 @@ These rules are mandatory. Follow them strictly.
 
 - Run all quality gates:
   ```bash
-  npm run lint && npm run typecheck && npm run build && npm test && npm audit --audit-level=moderate && npm run changeset:check && npm run pack:check
+  npm run lint && npm run typecheck && npm run build && npm run test:coverage && npm audit --audit-level=moderate && npm run changeset:check && npm run pack:check
   ```
 - Build before tests: the public-surface tests read generated declarations.
 - Verify that `npm pack --dry-run` includes only `dist/`, `README.md`,

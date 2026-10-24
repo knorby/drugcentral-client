@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { createDrugCentralClient } from "../src/index";
-import { routingFetch } from "./helpers";
+import { createDrugCentralClient, DrugCentralApiError } from "../src/index";
+import { queuedFetch, routingFetch } from "./helpers";
 
 /**
  * CONTRACT (Ritualog depends on this): DrugCentral reports no-match path
@@ -74,5 +74,17 @@ describe("404 → empty guided contract", () => {
 
   test("getTargetActivity resolves []", async () => {
     expectEmptyWithProvenance(await client.guide.getTargetActivity(999999999));
+  });
+});
+
+describe("non-404 failures stay visible", () => {
+  test("guided methods rethrow API errors instead of normalizing to []", async () => {
+    const failing = createDrugCentralClient({
+      baseUrl: "https://x.test",
+      fetch: queuedFetch([{ status: 500, body: "boom" }]).fetch,
+    });
+    await expect(
+      failing.guide.searchStructuresByName("ibuprofen"),
+    ).rejects.toBeInstanceOf(DrugCentralApiError);
   });
 });

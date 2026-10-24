@@ -104,6 +104,41 @@ describe("responses", () => {
     expect(text).toBe("a,b\n1,2");
   });
 
+  test("getText maps a non-2xx response to DrugCentralApiError", async () => {
+    const { requester } = makeRequester([
+      { status: 500, body: "export failed" },
+    ]);
+    const error = (await requester
+      .getText("structures/csv")
+      .catch((e: unknown) => e)) as DrugCentralApiError;
+    expect(error).toBeInstanceOf(DrugCentralApiError);
+    expect(error.status).toBe(500);
+    expect(error.body).toBe("export failed");
+    expect(error.url).toContain("/structures/csv");
+  });
+
+  test("getText maps 404 to DrugCentralNotFoundError", async () => {
+    const { requester } = makeRequester([
+      { status: 404, body: '{"detail":"not found"}' },
+    ]);
+    const error = (await requester
+      .getText("structures/csv")
+      .catch((e: unknown) => e)) as DrugCentralNotFoundError;
+    expect(error).toBeInstanceOf(DrugCentralNotFoundError);
+    expect(error.url).toContain("/structures/csv");
+  });
+
+  test("caps error excerpts at 200 characters", async () => {
+    const { requester } = makeRequester([
+      { status: 500, body: "x".repeat(300) },
+    ]);
+    const error = (await requester
+      .get("structures")
+      .catch((e: unknown) => e)) as DrugCentralApiError;
+    expect(error.message.endsWith("…")).toBe(true);
+    expect(error.body).toHaveLength(300);
+  });
+
   test("non-JSON 200 body throws DrugCentralInvalidResponseError with an excerpt", async () => {
     const { requester } = makeRequester([
       { status: 200, body: "Internal something went wrong" },
@@ -152,6 +187,30 @@ describe("responses", () => {
     expect(error).toBeInstanceOf(DrugCentralApiError);
     expect(error.status).toBe(404);
     expect(error.message).toContain("struct_id not found");
+  });
+});
+
+describe("configuration validation", () => {
+  test("rejects a negative maxRetries", () => {
+    expect(
+      () =>
+        new DrugCentralRequester({
+          baseUrl: BASE,
+          fetch: queuedFetch([]).fetch,
+          maxRetries: -1,
+        }),
+    ).toThrow(RangeError);
+  });
+
+  test("rejects a non-integer maxRetries", () => {
+    expect(
+      () =>
+        new DrugCentralRequester({
+          baseUrl: BASE,
+          fetch: queuedFetch([]).fetch,
+          maxRetries: 1.5,
+        }),
+    ).toThrow(RangeError);
   });
 });
 
