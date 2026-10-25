@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 47204a8: Refresh development dependencies, require 100% test coverage, upload coverage to Codecov in CI, and add README status badges.
+
 ## 0.1.0
 
 ### Minor Changes
