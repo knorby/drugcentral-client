@@ -145,11 +145,18 @@ scanning). Both are needed for full coverage.
 
 ---
 
-## Changesets
+## Changesets and releases
 
 Record changes that affect published output in `.changeset/*.md` alongside
 the code change. This repo uses [Changesets](https://github.com/changesets/changesets)
 for versioning and changelogs.
+
+Releases run from `.github/workflows/release.yml`: pending changesets open a
+"Version Packages" PR, and merging it publishes that version to npm via OIDC
+trusted publishing (no npm token secrets) and creates a GitHub Release. Tests
+run separately in `.github/workflows/tests.yml` and do not gate publishing.
+The one-time repository setup — the `release` environment and an npm trusted
+publisher for this workflow and environment — is already configured.
 
 ---
 
