@@ -31,12 +31,24 @@ function checkPack(paths: string[], version = manifest.version) {
 }
 
 describe("release metadata", () => {
-  test("the lockfile identifies the same version as the published manifest", () => {
+  // Changesets bumps package.json without rewriting package-lock.json
+  // (https://github.com/changesets/changesets/issues/1139), so the lockfile's
+  // root version lags after a release. That field is install metadata, not an
+  // npm ci or publish input, so assert the identity and dependency pins the
+  // install actually uses instead of forcing a lockfile write into the release.
+  test("the lockfile pins this package and its dependencies", () => {
     const lock = JSON.parse(
       readFileSync(join(root, "package-lock.json"), "utf8"),
     );
-    expect(lock.version).toBe(manifest.version);
-    expect(lock.packages[""].version).toBe(manifest.version);
+    expect(lock.name).toBe(manifest.name);
+    expect(lock.lockfileVersion).toBe(3);
+    expect(lock.packages[""].name).toBe(manifest.name);
+    expect(lock.packages[""].dependencies ?? {}).toEqual(
+      manifest.dependencies ?? {},
+    );
+    expect(lock.packages[""].devDependencies ?? {}).toEqual(
+      manifest.devDependencies ?? {},
+    );
   });
 });
 
