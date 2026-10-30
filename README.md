@@ -63,7 +63,7 @@ for (const candidate of search.data) {
   // matchReason: "preferred-name" | "synonym"
 }
 
-// 2. Resolve an external identifier (RxNorm shown; UNII also supported).
+// 2. Resolve an external identifier (any crosswalk vocabulary; helpers shown).
 const rxcui = await guide.resolveByRxcui("259453");
 const structId = rxcui.data[0]?.structId;
 
@@ -84,7 +84,7 @@ if (structId !== undefined) {
 }
 ```
 
-`resolveIdentifier({ type, value })` validates the vocabulary against a verified list (`RXNORM`, `UNII`, `SNOMEDCT_US`, `DRUGBANK_ID`, MeSH, and others — `KNOWN_IDENTIFIER_TYPES`); unsupported types throw instead of fuzzy-matching. `resolveByNdc` **throws by design**: this API version cannot join NDCs to structures (see [Known upstream gaps](#known-upstream-gaps)).
+`resolveIdentifier({ type, value })` returns **exact** identifier matches; upstream contains matches are discarded. UNII values are case-insensitive while other identifier values are case-sensitive, and source spellings (including leading zeros) are preserved. Vocabulary names are case-insensitive, and any nonblank vocabulary is accepted — including values absent from `KNOWN_IDENTIFIER_TYPES` and `client.idTypes.list()`. An unknown nonblank vocabulary with no exact rows resolves to `data: []`. `resolveByNdc` **throws by design**: this API version cannot join NDCs to structures (see [Known upstream gaps](#known-upstream-gaps)).
 
 ## Resource namespaces
 
@@ -92,7 +92,7 @@ Complete typed coverage when you need a specific table (`getAll` methods auto-pa
 
 | Namespace | Upstream table(s) | Notes |
 | --- | --- | --- |
-| `client.structures` | `structures` | id/name/inchikey/smiles/cd_id filters; csv/tsv |
+| `client.structures` | `structures` | id/name/inchikey/smiles/cd_id filters; `cd_id` is DrugCentral's own, not PubChem; csv/tsv |
 | `client.synonyms` | `synonyms` | one name may map to many structures |
 | `client.identifiers` | `identifier` | external-vocabulary crosswalk |
 | `client.idTypes` | `id_type` | the vocabularies themselves |
@@ -134,14 +134,14 @@ Guided methods that accept `limit` (`searchStructuresByName`, `getConditionRelat
 
 Every failure is a `DrugCentralError` subclass: `DrugCentralApiError` (non-2xx; `.status`, `.body`, `.url`), `DrugCentralNotFoundError` (DrugCentral reports **no-match path filters as HTTP 404** — catch this to treat "no rows" as a normal outcome; it never means the data was checked or is safe), `DrugCentralInvalidResponseError` (the observed transient non-JSON bodies), `DrugCentralTimeoutError`, `DrugCentralNetworkError`. Consumer aborts re-throw the original `AbortError` unwrapped.
 
-**No-match contract (pinned in tests — safe to rely on).** Upstream reports no-match path filters as HTTP 404. Resource-level methods surface `DrugCentralNotFoundError`; guided-layer methods that can legitimately see zero rows (`searchStructuresByName`, `resolveIdentifier`/`resolveByRxcui`/`resolveByUnii`, `getConditionRelationships` + kind wrappers, `getFaersSignals`, `getTargetActivity`) normalize no-match to `data: []` with a provenance envelope, and `getStructureProfile` resolves `structure: null` + empty sections — never an error. Empty means "no rows matched", never "safe".
+**No-match contract (pinned in tests — safe to rely on).** Upstream reports no-match path filters as HTTP 404. Resource-level methods surface `DrugCentralNotFoundError`; guided-layer methods that can legitimately see zero rows (`searchStructuresByName`, `resolveIdentifier`/`resolveByRxcui`/`resolveByUnii`, `getConditionRelationships` + kind wrappers, `getFaersSignals`, `getTargetActivity`) normalize no-match to `data: []` with a provenance envelope, and `getStructureProfile` resolves `structure: null` + empty sections — never an error. Empty means "no rows matched", never "safe". Guided identifier resolution additionally discards upstream substring rows, accepts any nonblank vocabulary, and returns `[]` for an unknown nonblank vocabulary with no exact match.
 
 ## Capability matrix
 
 | Capability | Method(s) | Status |
 | --- | --- | --- |
 | Search structures, preserve one-to-many identity | `guide.searchStructuresByName` | ✅ |
-| Resolve external identifiers (RxNorm, UNII, …) | `guide.resolveIdentifier`, `resolveByRxcui`, `resolveByUnii` | ✅ |
+| Resolve external identifiers (any crosswalk vocabulary, including PubChem, ChEMBL, UMLS, KEGG, INN, IUPHAR, ChEBI, and Inxight) | `guide.resolveIdentifier`, `resolveByRxcui`, `resolveByUnii` | ✅ |
 | Resolve NDCs to structures | `guide.resolveByNdc` | ❌ unsupported upstream (throws, documented) |
 | Drug–condition relationships with verbatim labels | `guide.getConditionRelationships`, `getIndications`, `getOffLabelUses`, `getContraindications` | ✅ |
 | FAERS signals, population-stratified | `guide.getFaersSignals` | ✅ (3 strata only — see gaps) |
@@ -155,6 +155,8 @@ Every failure is a `DrugCentralError` subclass: `DrugCentralApiError` (non-2xx; 
 - **NDC → structure is impossible** on this API version: `product.id` and `struct2obprod.prod_id` are disjoint id spaces and no obprod-by-NDC endpoint exists.
 - **Only 3 FAERS strata** (`all`/`male`/`female`) are exposed; the DrugCentral database carries more (geriatric, pediatric, …).
 - **`relationship_name` path filters substring-match** upstream (`"indication"` also returns `"contraindication"` rows). The guided layer filters by exact equality client-side; `client.omopRelationships.byRelationshipName` is a verbatim passthrough with this documented trap.
+- **`identifier/identifier` path filters substring-match** upstream (`"199130"` also returns `"1991302"`). The guided resolver keeps only exact values; `client.identifiers.byIdentifier` is a verbatim passthrough with this documented trap.
+- **`cd_id` is not a PubChem CID.** It is DrugCentral's own compound field; PubChem identity comes from `PUBCHEM_CID` rows in the identifier crosswalk.
 - **Transient non-JSON 5xx bodies** occur; mapped to typed errors, with opt-in bounded retry.
 - **Browser CORS is unverified**; React Native is a primary target, web best-effort.
 

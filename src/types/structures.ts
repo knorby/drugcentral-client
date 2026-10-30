@@ -23,7 +23,11 @@ export interface DrugStructure {
   no_formulations: number | null;
   /** FDA label set identifier(s), when supplied. */
   fda_labels: number[] | string | null;
-  /** PubChem-compatible structure identifiers. */
+  /**
+   * DrugCentral's own compound identifier (`cd_id`). This is not a PubChem
+   * CID and is not interchangeable with the `PUBCHEM_CID` identifier
+   * crosswalk; use the crosswalk for PubChem identity.
+   */
   cd_id: number | null;
   cd_formula: string | null;
   cd_molweight: number | null;
