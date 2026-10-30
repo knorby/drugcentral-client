@@ -148,9 +148,26 @@ describe("guide.resolveIdentifier", () => {
     },
   ];
 
+  const RXCUI_LONG: IdentifierRecord = {
+    id: 1916562,
+    identifier: "1991302",
+    id_type: "RXNORM",
+    struct_id: 5267,
+    parent_match: null,
+  };
+
   test("resolves by type+value and preserves match shape", async () => {
     const { client } = clientWithRoutes({
-      "identifier/identifier/259453": RX_ROWS,
+      "identifier/identifier/259453": [
+        ...RX_ROWS,
+        {
+          id: 999,
+          identifier: "259453",
+          id_type: "MMSL",
+          struct_id: 999,
+          parent_match: null,
+        },
+      ],
     });
     const { data } = await client.guide.resolveIdentifier({
       type: "RXNORM",
@@ -165,15 +182,147 @@ describe("guide.resolveIdentifier", () => {
     });
   });
 
-  test("throws for an unsupported type, naming the supported list", async () => {
-    const { client } = clientWithRoutes({});
-    await expect(
-      client.guide.resolveIdentifier({ type: "NOT_A_TYPE", value: "x" }),
-    ).rejects.toBeInstanceOf(DrugCentralError);
-    await expect(
-      client.guide.resolveIdentifier({ type: "NOT_A_TYPE", value: "x" }),
-    ).rejects.toThrow(/RXNORM/);
+  test("does not accept a substring row as an exact match", async () => {
+    const { client } = clientWithRoutes({
+      "identifier/identifier/199130": [RXCUI_LONG],
+    });
+    const { data } = await client.guide.resolveByRxcui("199130");
+    expect(data).toEqual([]);
   });
+
+  test("matches UNII values case-insensitively without rewriting source spelling", async () => {
+    const uniiRow: IdentifierRecord = {
+      id: 1901605,
+      identifier: "M9BYU8XDQ6",
+      id_type: "UNII",
+      struct_id: 5267,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/m9byu8xdq6": [uniiRow],
+    });
+    const { data } = await client.guide.resolveByUnii("m9byu8xdq6");
+    expect(data).toHaveLength(1);
+    expect(data[0]?.identifier).toBe("M9BYU8XDQ6");
+  });
+
+  test("keeps non-UNII identifier matching case-sensitive", async () => {
+    const drugBank: IdentifierRecord = {
+      id: 1,
+      identifier: "DB00001",
+      id_type: "DRUGBANK_ID",
+      struct_id: 1,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/db00001": [drugBank],
+      "identifier/identifier/DB00001": [drugBank],
+    });
+    const miss = await client.guide.resolveIdentifier({
+      type: "DRUGBANK_ID",
+      value: "db00001",
+    });
+    const hit = await client.guide.resolveIdentifier({
+      type: "DRUGBANK_ID",
+      value: "DB00001",
+    });
+    expect(miss.data).toEqual([]);
+    expect(hit.data).toHaveLength(1);
+  });
+
+  test("resolves a vocabulary absent from the discovery snapshot", async () => {
+    const row: IdentifierRecord = {
+      id: 1,
+      identifier: "X1",
+      id_type: "FUTURE_VOCAB",
+      struct_id: 74,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/X1": [row],
+    });
+    const { data } = await client.guide.resolveIdentifier({
+      type: "FUTURE_VOCAB",
+      value: "X1",
+    });
+    expect(data).toHaveLength(1);
+  });
+
+  test("matches vocabulary names case-insensitively", async () => {
+    const row: IdentifierRecord = {
+      id: 2,
+      identifier: "CHEMBL2108724",
+      id_type: "ChEMBL_ID",
+      struct_id: 5267,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/CHEMBL2108724": [row],
+    });
+    const { data } = await client.guide.resolveIdentifier({
+      type: "chembl_id",
+      value: "CHEMBL2108724",
+    });
+    expect(data[0]?.idType).toBe("ChEMBL_ID");
+  });
+
+  test("supports vocabularies containing spaces", async () => {
+    const row: IdentifierRecord = {
+      id: 493,
+      identifier: "53AXN4NNHX",
+      id_type: "INXIGHT DRUGS",
+      struct_id: 5267,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/53AXN4NNHX": [row],
+    });
+    const { data } = await client.guide.resolveIdentifier({
+      type: "INXIGHT DRUGS",
+      value: "53AXN4NNHX",
+    });
+    expect(data).toHaveLength(1);
+  });
+
+  test("rejects a blank vocabulary before requesting", async () => {
+    const { client, mock } = clientWithRoutes({});
+    await expect(
+      client.guide.resolveIdentifier({ type: "   ", value: "x" }),
+    ).rejects.toBeInstanceOf(DrugCentralError);
+    expect(mock.urls).toHaveLength(0);
+  });
+
+  test.each([
+    ["PUBCHEM_CID", "56843331"],
+    ["ChEMBL_ID", "CHEMBL2108724"],
+    ["UMLSCUI", "C3885068"],
+    ["KEGG_DRUG", "D10025"],
+    ["INN_ID", "9113"],
+    ["IUPHAR_LIGAND_ID", "9724"],
+    ["CHEBI", "CHEBI:167574"],
+    ["INXIGHT DRUGS", "53AXN4NNHX"],
+    ["NDDF", "017424"],
+  ])(
+    "resolves observed vocabulary %s and preserves %s",
+    async (idType, identifier) => {
+      const row: IdentifierRecord = {
+        id: 1,
+        identifier,
+        id_type: idType,
+        struct_id: 5267,
+        parent_match: null,
+      };
+      const { client } = clientWithRoutes({
+        [`identifier/identifier/${identifier}`]: [row],
+      });
+      const { data } = await client.guide.resolveIdentifier({
+        type: idType,
+        value: identifier,
+      });
+      expect(data).toHaveLength(1);
+      expect(data[0]).toMatchObject({ idType, identifier });
+    },
+  );
 
   test("empty matches are data: [] with provenance, never an error", async () => {
     const { client } = clientWithRoutes({});

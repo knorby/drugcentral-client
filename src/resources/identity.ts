@@ -47,7 +47,11 @@ export function createStructuresResource(requester: DrugCentralRequester) {
     bySmiles(smiles: string): Promise<DrugStructure[]> {
       return requester.get(`${path}/smiles/${seg(smiles)}`);
     },
-    /** Structures by PubChem compound id. */
+    /**
+     * Structures by DrugCentral's own `cd_id` field. This is not a PubChem
+     * CID; use `identifiers.byIdentifier` with the `PUBCHEM_CID` crosswalk for
+     * PubChem identity.
+     */
     byCdId(cdId: number): Promise<DrugStructure[]> {
       return requester.get(`${path}/cd_id/${seg(cdId)}`);
     },

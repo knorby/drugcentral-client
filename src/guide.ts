@@ -26,10 +26,11 @@ import type { Synonym } from "./types/synonyms";
 import type { ActTableFullEntry } from "./types/targets";
 
 /**
- * Identifier vocabularies verified live on 2026-10-03 (`/id_type` plus the
- * UNII table). This is a verified snapshot, not a guaranteed-exhaustive
- * registry — `client.idTypes.list()` returns the live set. NDC resolves
- * through the product table, not `resolveIdentifier`.
+ * Identifier vocabularies observed in DrugCentral crosswalk data. This is a
+ * verified discovery snapshot, not an exhaustive registry or resolver
+ * allowlist: `resolveIdentifier` accepts any nonblank vocabulary, including
+ * values absent here and from `client.idTypes.list()`. NDC resolves through
+ * the product table, not `resolveIdentifier`.
  */
 export const KNOWN_IDENTIFIER_TYPES = [
   "VANDF",
@@ -43,6 +44,14 @@ export const KNOWN_IDENTIFIER_TYPES = [
   "MESH_SUPPLEMENTAL_RECORD_UI",
   "SECONDARY_CAS_RN",
   "UNII",
+  "PUBCHEM_CID",
+  "ChEMBL_ID",
+  "UMLSCUI",
+  "KEGG_DRUG",
+  "INN_ID",
+  "IUPHAR_LIGAND_ID",
+  "CHEBI",
+  "INXIGHT DRUGS",
 ] as const;
 
 /** A structure candidate from a guided name search. */
@@ -114,6 +123,24 @@ async function tolerateNotFound<T>(request: Promise<T[]>): Promise<T[]> {
     if (error instanceof DrugCentralNotFoundError) return [];
     throw error;
   }
+}
+
+/**
+ * Upstream's identifier path filter is a contains match. Resolve exact values
+ * client-side; UNII is case-insensitive, while other identifiers keep source
+ * case and spelling.
+ */
+function matchesIdentifierValue(
+  stored: string,
+  queried: string,
+  idType: string,
+): boolean {
+  const source = stored.trim();
+  const value = queried.trim();
+  if (idType.trim().toUpperCase() === "UNII") {
+    return source.toUpperCase() === value.toUpperCase();
+  }
+  return source === value;
 }
 
 /**
@@ -198,28 +225,33 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
 
     /**
      * Resolves an external identifier to DrugCentral structure ids. The
-     * identifier vocabulary must be one this client knows (see
-     * {@link KNOWN_IDENTIFIER_TYPES}); unsupported vocabularies throw instead
-     * of fuzzy-matching. Name suggestions are never treated as crosswalk
-     * matches. An identifier that matches nothing resolves to `[]` — no
-     * match never means safe.
+     * vocabulary is matched case-insensitively and may be any nonblank
+     * DrugCentral vocabulary, including one absent from
+     * {@link KNOWN_IDENTIFIER_TYPES} and `client.idTypes.list()`. Values are
+     * exact matches; UNII is case-insensitive while other identifiers retain
+     * source case. Name suggestions are never treated as crosswalk matches.
+     * An identifier that matches nothing resolves to `[]` — no match never
+     * means safe.
      */
     async resolveIdentifier(params: {
       type: string;
       value: string | number;
     }): Promise<GuidedResult<IdentifierMatch[]>> {
       const { type, value } = params;
-      if (!(KNOWN_IDENTIFIER_TYPES as readonly string[]).includes(type)) {
+      const idType = type.trim();
+      if (idType.length === 0) {
         throw new DrugCentralError(
-          `Unsupported identifier type ${JSON.stringify(type)}. ` +
-            `Supported types: ${KNOWN_IDENTIFIER_TYPES.join(", ")}. ` +
-            "Call client.idTypes.list() for the live registry.",
+          "Identifier type must be a nonblank DrugCentral vocabulary.",
         );
       }
-      const identifier = String(value);
+      const identifier = String(value).trim();
       const rows = await tolerateNotFound(identifiers.byIdentifier(identifier));
       const matches = (rows as IdentifierRecord[])
-        .filter((row) => row.id_type === type)
+        .filter(
+          (row) =>
+            row.id_type.trim().toUpperCase() === idType.toUpperCase() &&
+            matchesIdentifierValue(row.identifier, identifier, idType),
+        )
         .map((row) => ({
           structId: row.struct_id,
           identifier: row.identifier,
