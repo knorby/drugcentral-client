@@ -1,6 +1,6 @@
 {
   "name": "@knorby/drugcentral-client",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A fully-typed, zero-dependency TypeScript client for the DrugCentral API. Universal: Node, React Native, browsers, Bun, and Deno.",
   "license": "Apache-2.0",
   "keywords": [
