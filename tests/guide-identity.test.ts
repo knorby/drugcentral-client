@@ -230,14 +230,66 @@ describe("guide.resolveIdentifier", () => {
     expect(hit.data).toHaveLength(1);
   });
 
-  test("throws for an unsupported type, naming the supported list", async () => {
-    const { client } = clientWithRoutes({});
+  test("resolves a vocabulary absent from the discovery snapshot", async () => {
+    const row: IdentifierRecord = {
+      id: 1,
+      identifier: "X1",
+      id_type: "FUTURE_VOCAB",
+      struct_id: 74,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/X1": [row],
+    });
+    const { data } = await client.guide.resolveIdentifier({
+      type: "FUTURE_VOCAB",
+      value: "X1",
+    });
+    expect(data).toHaveLength(1);
+  });
+
+  test("matches vocabulary names case-insensitively", async () => {
+    const row: IdentifierRecord = {
+      id: 2,
+      identifier: "CHEMBL2108724",
+      id_type: "ChEMBL_ID",
+      struct_id: 5267,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/CHEMBL2108724": [row],
+    });
+    const { data } = await client.guide.resolveIdentifier({
+      type: "chembl_id",
+      value: "CHEMBL2108724",
+    });
+    expect(data[0]?.idType).toBe("ChEMBL_ID");
+  });
+
+  test("supports vocabularies containing spaces", async () => {
+    const row: IdentifierRecord = {
+      id: 493,
+      identifier: "53AXN4NNHX",
+      id_type: "INXIGHT DRUGS",
+      struct_id: 5267,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/53AXN4NNHX": [row],
+    });
+    const { data } = await client.guide.resolveIdentifier({
+      type: "INXIGHT DRUGS",
+      value: "53AXN4NNHX",
+    });
+    expect(data).toHaveLength(1);
+  });
+
+  test("rejects a blank vocabulary before requesting", async () => {
+    const { client, mock } = clientWithRoutes({});
     await expect(
-      client.guide.resolveIdentifier({ type: "NOT_A_TYPE", value: "x" }),
+      client.guide.resolveIdentifier({ type: "   ", value: "x" }),
     ).rejects.toBeInstanceOf(DrugCentralError);
-    await expect(
-      client.guide.resolveIdentifier({ type: "NOT_A_TYPE", value: "x" }),
-    ).rejects.toThrow(/RXNORM/);
+    expect(mock.urls).toHaveLength(0);
   });
 
   test("empty matches are data: [] with provenance, never an error", async () => {
