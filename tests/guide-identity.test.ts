@@ -292,6 +292,38 @@ describe("guide.resolveIdentifier", () => {
     expect(mock.urls).toHaveLength(0);
   });
 
+  test.each([
+    ["PUBCHEM_CID", "56843331"],
+    ["ChEMBL_ID", "CHEMBL2108724"],
+    ["UMLSCUI", "C3885068"],
+    ["KEGG_DRUG", "D10025"],
+    ["INN_ID", "9113"],
+    ["IUPHAR_LIGAND_ID", "9724"],
+    ["CHEBI", "CHEBI:167574"],
+    ["INXIGHT DRUGS", "53AXN4NNHX"],
+    ["NDDF", "017424"],
+  ])(
+    "resolves observed vocabulary %s and preserves %s",
+    async (idType, identifier) => {
+      const row: IdentifierRecord = {
+        id: 1,
+        identifier,
+        id_type: idType,
+        struct_id: 5267,
+        parent_match: null,
+      };
+      const { client } = clientWithRoutes({
+        [`identifier/identifier/${identifier}`]: [row],
+      });
+      const { data } = await client.guide.resolveIdentifier({
+        type: idType,
+        value: identifier,
+      });
+      expect(data).toHaveLength(1);
+      expect(data[0]).toMatchObject({ idType, identifier });
+    },
+  );
+
   test("empty matches are data: [] with provenance, never an error", async () => {
     const { client } = clientWithRoutes({});
     const { data, provenance } = await client.guide.resolveIdentifier({

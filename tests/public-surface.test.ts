@@ -25,10 +25,18 @@ describe("public export surface", () => {
   test("KNOWN_IDENTIFIER_TYPES is a value export", () => {
     expect(KNOWN_IDENTIFIER_TYPES).toContain("RXNORM");
     expect(KNOWN_IDENTIFIER_TYPES).toContain("UNII");
-    expect(KNOWN_IDENTIFIER_TYPES).toContain("PUBCHEM_CID");
-    expect(KNOWN_IDENTIFIER_TYPES).toContain("ChEMBL_ID");
-    expect(KNOWN_IDENTIFIER_TYPES).toContain("INXIGHT DRUGS");
-    expect(KNOWN_IDENTIFIER_TYPES).toContain("UMLSCUI");
+    for (const idType of [
+      "PUBCHEM_CID",
+      "ChEMBL_ID",
+      "UMLSCUI",
+      "KEGG_DRUG",
+      "INN_ID",
+      "IUPHAR_LIGAND_ID",
+      "CHEBI",
+      "INXIGHT DRUGS",
+    ]) {
+      expect(KNOWN_IDENTIFIER_TYPES).toContain(idType);
+    }
   });
 
   test("record types are importable by name (no star-export-only types)", () => {
