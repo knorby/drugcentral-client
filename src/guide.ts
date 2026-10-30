@@ -117,6 +117,24 @@ async function tolerateNotFound<T>(request: Promise<T[]>): Promise<T[]> {
 }
 
 /**
+ * Upstream's identifier path filter is a contains match. Resolve exact values
+ * client-side; UNII is case-insensitive, while other identifiers keep source
+ * case and spelling.
+ */
+function matchesIdentifierValue(
+  stored: string,
+  queried: string,
+  idType: string,
+): boolean {
+  const source = stored.trim();
+  const value = queried.trim();
+  if (idType.trim().toUpperCase() === "UNII") {
+    return source.toUpperCase() === value.toUpperCase();
+  }
+  return source === value;
+}
+
+/**
  * Guided domain layer: higher-level, provenance-enveloped operations that
  * implement the client's core capabilities (identity search/resolution,
  * structure profiles, condition relationships, FAERS signals, target
@@ -216,10 +234,14 @@ export function createDrugCentralGuide(requester: DrugCentralRequester) {
             "Call client.idTypes.list() for the live registry.",
         );
       }
-      const identifier = String(value);
+      const identifier = String(value).trim();
       const rows = await tolerateNotFound(identifiers.byIdentifier(identifier));
       const matches = (rows as IdentifierRecord[])
-        .filter((row) => row.id_type === type)
+        .filter(
+          (row) =>
+            row.id_type === type &&
+            matchesIdentifierValue(row.identifier, identifier, type),
+        )
         .map((row) => ({
           structId: row.struct_id,
           identifier: row.identifier,

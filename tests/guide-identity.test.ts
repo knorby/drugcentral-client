@@ -148,9 +148,26 @@ describe("guide.resolveIdentifier", () => {
     },
   ];
 
+  const RXCUI_LONG: IdentifierRecord = {
+    id: 1916562,
+    identifier: "1991302",
+    id_type: "RXNORM",
+    struct_id: 5267,
+    parent_match: null,
+  };
+
   test("resolves by type+value and preserves match shape", async () => {
     const { client } = clientWithRoutes({
-      "identifier/identifier/259453": RX_ROWS,
+      "identifier/identifier/259453": [
+        ...RX_ROWS,
+        {
+          id: 999,
+          identifier: "259453",
+          id_type: "MMSL",
+          struct_id: 999,
+          parent_match: null,
+        },
+      ],
     });
     const { data } = await client.guide.resolveIdentifier({
       type: "RXNORM",
@@ -163,6 +180,54 @@ describe("guide.resolveIdentifier", () => {
       idType: "RXNORM",
       matchKind: "identifier",
     });
+  });
+
+  test("does not accept a substring row as an exact match", async () => {
+    const { client } = clientWithRoutes({
+      "identifier/identifier/199130": [RXCUI_LONG],
+    });
+    const { data } = await client.guide.resolveByRxcui("199130");
+    expect(data).toEqual([]);
+  });
+
+  test("matches UNII values case-insensitively without rewriting source spelling", async () => {
+    const uniiRow: IdentifierRecord = {
+      id: 1901605,
+      identifier: "M9BYU8XDQ6",
+      id_type: "UNII",
+      struct_id: 5267,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/m9byu8xdq6": [uniiRow],
+    });
+    const { data } = await client.guide.resolveByUnii("m9byu8xdq6");
+    expect(data).toHaveLength(1);
+    expect(data[0]?.identifier).toBe("M9BYU8XDQ6");
+  });
+
+  test("keeps non-UNII identifier matching case-sensitive", async () => {
+    const drugBank: IdentifierRecord = {
+      id: 1,
+      identifier: "DB00001",
+      id_type: "DRUGBANK_ID",
+      struct_id: 1,
+      parent_match: null,
+    };
+    const { client } = clientWithRoutes({
+      "identifier/identifier/db00001": [drugBank],
+      "identifier/identifier/DB00001": [drugBank],
+    });
+    const miss = await client.guide.resolveIdentifier({
+      type: "DRUGBANK_ID",
+      value: "db00001",
+    });
+    const hit = await client.guide.resolveIdentifier({
+      type: "DRUGBANK_ID",
+      value: "DB00001",
+    });
+    expect(miss.data).toEqual([]);
+    expect(hit.data).toHaveLength(1);
   });
 
   test("throws for an unsupported type, naming the supported list", async () => {
