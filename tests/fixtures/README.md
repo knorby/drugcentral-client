@@ -3,6 +3,7 @@
 The sampled response JSON files in this directory contain **DrugCentral
 data**, maintained by the University of New Mexico. They are provided under
 **CC BY-SA 4.0**, not the Apache-2.0 license used for this client's code.
+
 - Source: [DrugCentral](https://drugcentral.org) and its
   [about page](https://drugcentral.org/about).
 - Data license: [Creative Commons Attribution-ShareAlike 4.0
